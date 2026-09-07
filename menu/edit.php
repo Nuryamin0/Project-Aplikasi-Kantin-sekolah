@@ -3,41 +3,71 @@ include "../config/koneksi.php";
 
 /** @var mysqli $koneksi */
 
-$id =$_GET['id_menu'];
+$id = $_GET['id_menu'];
+
 if (isset($_POST['submit'])) {
     $nama_produk = $_POST['nama_produk'];
     $kategori = $_POST['kategori'];
     $harga = $_POST['harga'];
     $stok = $_POST['stok'];
 
-    $query = "UPDATE menu SET nama_produk ='$nama_produk', kategori = '$kategori', harga = '$harga', stok = '$stok' where id ='$id'";
-    mysqli_query($koneksi, $query);
-    header("Location:index.php");
-    exit;
+    $query = "UPDATE menu SET nama_produk = '$nama_produk', kategori = '$kategori', harga = '$harga', stok = '$stok' WHERE id_menu = '$id'";
+    $update = mysqli_query($koneksi, $query);
+
+    if ($update) {
+        header("Location: index.php");
+        exit();
+    } else {
+        echo "<script>alert('Gagal mengupdate data: " . mysqli_error($koneksi) . "');</script>";
+    }
 }
-    $query_lama = "SELECT * FROM menu WHERE id_menu ='$id'";
-    $hasil_lama = mysqli_query($koneksi, $query_lama);
-    $lama = mysqli_fetch_assoc($hasil_lama);
+
+$query_lama = "SELECT * FROM menu WHERE id_menu = '$id'";
+$hasil_lama = mysqli_query($koneksi, $query_lama);
+$lama = mysqli_fetch_assoc($hasil_lama);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Edit Data Menu</title>
 </head>
 <body>
-    <h1>Edit data menu</h1>
-    <form action="" method="POST">
-    <input type="text" name="nama_produk" value="<?php echo $lama['nama_produk']; ?>">
-    <select name="kategori" value="<?php echo $lama['kategori']; ?>">
-        <option value="">Pilih Kategori</option>
-        <option value="Makanan">Makanan</option>
-        <option value="Minuman">Minuman</option>
-        <option value="Cemilan">Cemilan</option>
-    </select>
-    <input type="text" name="harga" value="<?php echo $lama['harga']; ?>">
-    <input type="text" name="stok" value="<?php echo $lama['stok']; ?>">
-    <button type="submit" name="submit" class="btn-zoom">Update</button>
-</form>
-
+    <h2>Edit Data Menu</h2>
+    <form action="edit.php?id_menu=<?php echo $id; ?>" method="POST">
+        <table>
+            <tr>
+                <td>Nama Produk</td>
+                <td><input type="text" name="nama_produk" value="<?php echo htmlspecialchars($lama['nama_produk']); ?>" required></td>
+            </tr>
+            <tr>
+                <td>Kategori</td>
+                <td>
+                    <select name="kategori" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="Makanan" <?php echo ($lama['kategori'] == 'Makanan') ? 'selected' : ''; ?>>Makanan</option>
+                        <option value="Minuman" <?php echo ($lama['kategori'] == 'Minuman') ? 'selected' : ''; ?>>Minuman</option>
+                        <option value="Cemilan" <?php echo ($lama['kategori'] == 'Cemilan') ? 'selected' : ''; ?>>Cemilan</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Harga</td>
+                <td><input type="number" name="harga" value="<?php echo htmlspecialchars($lama['harga']); ?>" required></td>
+            </tr>
+            <tr>
+                <td>Stok</td>
+                <td><input type="number" name="stok" value="<?php echo htmlspecialchars($lama['stok']); ?>" required></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button type="submit" name="submit">Update</button>
+                    <a href="index.php">Batal</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>

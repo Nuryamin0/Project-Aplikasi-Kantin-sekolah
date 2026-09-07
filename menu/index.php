@@ -14,9 +14,35 @@ $data = mysqli_fetch_all($hasil, MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-</head>
-<body>
     <style>
+        body {
+    padding: 30px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+h1 {
+    color: #0d47a1;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2em;
+}
+
+a {
+    text-decoration: none;
+    color: #1976d2;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+a:hover {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -29,7 +55,30 @@ $data = mysqli_fetch_all($hasil, MYSQLI_ASSOC);
         th {
             background-color: #f2f2f2;
         }
+
+        .btn-zoom {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #2196f3;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+    transition: transform 0.2s ease;
+}
+
+.btn-zoom:hover {
+    transform: scale(1.1);  /* sedikit membesar saat diklik */
+}
+
+tbody {
+    color: #333;
+    
+}
     </style>
+</head>
+<body>
     <h1>Menu</h1>
     <table>
         <thead>
@@ -52,12 +101,14 @@ $data = mysqli_fetch_all($hasil, MYSQLI_ASSOC);
                 <td><?php echo $menu['stok'];?></td>
                 <td>
                     <a href="edit.php?id_menu=<?php echo $menu['id_menu']; ?>">Edit</a>
-                    <a href="hapus.php?id_menu=<?php echo $menu['id_menu']; ?>">Hapus</a>
+                    <a href="javascript:void(0)" onclick="deleteData(<?php echo $menu['id_menu']; ?>)">Hapus</a>
                 </td>
             </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
-    <a href="tambah.php">Tambah Menu</a>
+    <a href="tambah.php" class="btn-zoom">Tambah Menu</a>
+
+    <script src="../assets/script.js"></script>
 </body>
 </html>
