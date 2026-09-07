@@ -10,8 +10,11 @@ if (isset($_POST['submit'])) {
     $kategori = $_POST['kategori'];
     $harga = $_POST['harga'];
     $stok = $_POST['stok'];
+    $foto = $_FILES['foto']['name'];
+    $target_dir = "uploads/";
+    $target_file = $target_dir . basename($_FILES["foto"]["name"]);
 
-    $query = "UPDATE menu SET nama_produk = '$nama_produk', kategori = '$kategori', harga = '$harga', stok = '$stok' WHERE id_menu = '$id'";
+    $query = "UPDATE menu SET nama_produk = '$nama_produk', kategori = '$kategori', harga = '$harga', stok = '$stok', foto = '$foto' WHERE id_menu = '$id'";
     $update = mysqli_query($koneksi, $query);
 
     if ($update) {
@@ -59,6 +62,10 @@ $lama = mysqli_fetch_assoc($hasil_lama);
             <tr>
                 <td>Stok</td>
                 <td><input type="number" name="stok" value="<?php echo htmlspecialchars($lama['stok']); ?>" required></td>
+            </tr>
+            <tr>
+                <td>Foto</td>
+                <td><input type="file" name="foto" value="<?php echo htmlspecialchars($lama['foto']); ?>" required></td>
             </tr>
             <tr>
                 <td></td>

@@ -8,8 +8,11 @@ if (isset($_POST['submit'])) {
     $kategori = $_POST['kategori'];
     $harga = $_POST['harga'];
     $stok = $_POST['stok'];
+    $foto = $_FILES['foto']['name'];
+    $target_dir = "uploads/";
+    $target_file = $target_dir . basename($_FILES["foto"]["name"]);
 
-    $query = "INSERT INTO menu (nama_produk, kategori, harga, stok) VALUES ('$nama_produk', '$kategori', '$harga', '$stok')";
+    $query = "INSERT INTO menu (nama_produk, kategori, harga, stok, foto) VALUES ('$nama_produk', '$kategori', '$harga', '$stok', '$foto')";
     $simpan = mysqli_query($koneksi, $query);
 
     if ($simpan) {
@@ -54,6 +57,10 @@ if (isset($_POST['submit'])) {
             <tr>
                 <td>Stok</td>
                 <td><input type="number" name="stok" required></td>
+            </tr>
+            <tr>
+                <td>Foto</td>
+                <td><input type="file" name="foto" required></td>
             </tr>
             <tr>
                 <td></td>

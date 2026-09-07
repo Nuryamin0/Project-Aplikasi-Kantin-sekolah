@@ -88,6 +88,7 @@ tbody {
                 <th>kategori</th>
                 <th>harga</th>
                 <th>stok</th>
+                <th>foto</th>
                 <th>aksi</th>
             </tr>
         </thead>
@@ -99,6 +100,7 @@ tbody {
                 <td><?php echo $menu['kategori']; ?></td>
                 <td><?php echo $menu['harga'];?></td>
                 <td><?php echo $menu['stok'];?></td>
+                <td><?php echo $menu['foto'];?></td>
                 <td>
                     <a href="edit.php?id_menu=<?php echo $menu['id_menu']; ?>">Edit</a>
                     <a href="javascript:void(0)" onclick="deleteData(<?php echo $menu['id_menu']; ?>)">Hapus</a>
