@@ -24,6 +24,33 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `users`
+--
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id_user` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL UNIQUE,
+  `password` varchar(255) NOT NULL,
+  `nama_lengkap` varchar(100) NOT NULL,
+  `role` enum('admin','user') NOT NULL DEFAULT 'user',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_user`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `users`
+--
+-- Password default: admin123 (untuk admin) dan siswa123 (untuk siswa)
+--
+
+INSERT INTO `users` (`id_user`, `username`, `password`, `nama_lengkap`, `role`) VALUES
+(1, 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator Kantin', 'admin'),
+(2, 'siswa', '$2y$10$eA0Xn42b7.v/l9a36h7tEu.uJtzqjY.oQvVzH.0f8vG1mGqHl8P4W', 'Siswa Contoh', 'user')
+ON DUPLICATE KEY UPDATE `username`=`username`;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `detail_transaksi`
 --
 

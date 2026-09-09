@@ -1,0 +1,658 @@
+/* ==========================================================================
+   CSS Aplikasi Kantin Sekolah
+   ========================================================================== */
+
+/* 1. Global Reset & Base Styles */
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f1f5f9;
+    color: #334155;
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+h1, h2, h3 {
+    color: #1e293b;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* 2. Halaman Login & Registrasi */
+body.login-body {
+    background: linear-gradient(135deg, #eff6ff 0%, #f1f5f9 50%, #e2e8f0 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 440px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-logo {
+    font-size: 2.8rem;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.08));
+}
+
+.auth-header h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+}
+
+.auth-subtitle {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.login-card {
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+}
+
+/* Tab Navigasi Login / Register */
+.auth-tabs {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 8px;
+    margin-bottom: 22px;
+    gap: 4px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.tab-btn:hover {
+    color: #1e293b;
+}
+
+.tab-btn.active {
+    background: #ffffff;
+    color: #2563eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Panel Konten Tab */
+.auth-panel {
+    display: none;
+    animation: fadeIn 0.25s ease-in-out;
+}
+
+.auth-panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form Groups & Inputs */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 1rem;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.input-with-icon input {
+    width: 100%;
+    padding: 10px 40px 10px 38px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.2s ease;
+    background-color: #f8fafc;
+}
+
+.input-with-icon input:focus {
+    border-color: #2563eb;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-toggle-pwd {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.btn-toggle-pwd:hover {
+    opacity: 1;
+}
+
+.form-hint {
+    display: block;
+    font-size: 0.76rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* Selector Peran (Role) */
+.role-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.role-option {
+    cursor: pointer;
+}
+
+.role-option input[type="radio"] {
+    display: none;
+}
+
+.role-card {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    text-align: left;
+    height: 100%;
+}
+
+.role-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.role-desc {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.role-option input[type="radio"]:checked + .role-card {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.role-option input[type="radio"]:checked + .role-card .role-title {
+    color: #1d4ed8;
+}
+
+/* Buttons */
+.btn-primary {
+    width: 100%;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 11px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    margin-top: 6px;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-success-action {
+    background: #16a34a;
+    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);
+}
+
+.btn-success-action:hover {
+    background: #15803d;
+    box-shadow: 0 4px 6px rgba(22, 163, 74, 0.25);
+}
+
+/* Alert Notification */
+.alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    animation: fadeIn 0.2s ease;
+}
+
+.alert-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+/* Footer Link Tab */
+.auth-footer {
+    text-align: center;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 0.86rem;
+    color: #64748b;
+}
+
+.auth-link {
+    color: #2563eb;
+    font-weight: 600;
+    margin-left: 4px;
+    transition: color 0.2s;
+}
+
+.auth-link:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+/* 3. Header & Navigasi */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    background: #ffffff;
+    padding: 16px 22px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+.header h1 {
+    font-size: 1.4rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-add {
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition: background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-add:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-logout {
+    background-color: #ef4444;
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition: background-color 0.2s;
+}
+
+.btn-logout:hover {
+    background-color: #dc2626;
+}
+
+.navigasi {
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.navigasi a {
+    color: #2563eb;
+    margin-right: 20px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: color 0.2s;
+}
+
+.navigasi a:hover {
+    color: #1d4ed8;
+}
+
+.navigasi a.aktif {
+    color: #0f172a;
+    cursor: default;
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 3px;
+}
+
+/* 4. Statistik Dashboard */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.stat-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #2563eb;
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-card.green {
+    border-left-color: #16a34a;
+}
+
+.stat-card.orange {
+    border-left-color: #f97316;
+}
+
+.stat-card.purple {
+    border-left-color: #9333ea;
+}
+
+.stat-card h3 {
+    font-size: 0.82rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.stat-card p {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* 5. Tabel & Container */
+.section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #0f172a;
+}
+
+.table-container {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    overflow-x: auto;
+    margin-bottom: 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+}
+
+th {
+    background-color: #f8fafc;
+    color: #475569;
+    padding: 12px 16px;
+    border-bottom: 2px solid #e2e8f0;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+tr:hover td {
+    background-color: #f8fafc;
+}
+
+.img-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Badges */
+.badge {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.badge-kat {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-stok {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+/* Tombol Aksi */
+.btn-action {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-right: 4px;
+    display: inline-block;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.btn-action:hover {
+    opacity: 0.9;
+}
+
+.btn-edit {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.btn-delete, .btn-hapus {
+    background-color: #ef4444;
+    color: white;
+}
+
+.btn-tambah {
+    background-color: #16a34a;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 15px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition: background-color 0.2s;
+}
+
+.btn-tambah:hover {
+    background-color: #15803d;
+}
+
+/* 6. Grid Katalog Menu (Tampilan Pembeli / User) */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
+}
+
+.menu-card {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.menu-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+}
+
+.menu-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    background-color: #f1f5f9;
+}
+
+.card-body {
+    padding: 16px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.menu-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 6px 0 4px 0;
+}
+
+.menu-price {
+    font-size: 1.05rem;
+    color: #16a34a;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.btn-buy {
+    background-color: #2563eb;
+    color: #ffffff;
+    text-align: center;
+    padding: 9px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: block;
+    margin-top: 12px;
+    transition: background-color 0.2s;
+}
+
+.btn-buy:hover {
+    background-color: #1d4ed8;
+}
