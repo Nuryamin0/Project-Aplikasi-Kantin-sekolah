@@ -1,11 +1,10 @@
 <?php
-require_once __DIR__ . "/../config/koneksi.php";
+include "../config/koneksi.php";
 
 /** @var mysqli $koneksi */
 
 $id_transaksi = $_GET['id'];
 
-// Query JOIN menggabungkan detail, transaksi induk, dan nama menu asli
 $query = "SELECT d.*, t.kode_transaksi, t.nama_pembeli, m.nama_menu, m.harga 
           FROM detail_transaksi d
           INNER JOIN transaksi t ON d.id_transaksi = t.id_transaksi

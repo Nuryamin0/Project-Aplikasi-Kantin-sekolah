@@ -1,5 +1,5 @@
 <?php
-include"../config/koneksi.php";
+include "../config/koneksi.php";
 
 /** @var mysqli $koneksi */
 
