@@ -40,10 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             header("Location: " . $_SERVER['PHP_SELF']);
             exit();
         } else {
-            $login_error = "Password salah!";
+            $login_error = "Password yang Anda masukkan salah!";
         }
     } else {
-        $login_error = "Username tidak ditemukan!";
+        $login_error = "Username tidak ditemukan dalam sistem!";
     }
 }
 
@@ -61,13 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
 
     $check_user = mysqli_query($koneksi, "SELECT id_user FROM users WHERE username = '$username'");
     if (mysqli_num_rows($check_user) > 0) {
-        $register_error = "Username sudah digunakan!";
+        $register_error = "Username sudah digunakan, silakan pilih yang lain!";
     } else {
         $query_reg = "INSERT INTO users (username, password, nama_lengkap, role) VALUES ('$username', '$password', '$nama_lengkap', '$role')";
         if (mysqli_query($koneksi, $query_reg)) {
             $register_success = "Akun berhasil dibuat! Silakan Sign In.";
         } else {
-            $register_error = "Gagal mendaftar, coba lagi.";
+            $register_error = "Gagal mendaftar, silakan coba lagi.";
         }
     }
 }
@@ -83,33 +83,58 @@ if (!isset($_SESSION['role'])) :
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In / Register - Aplikasi Kantin</title>
+    <title>Sign In / Register - E-Kantin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .login-body { background-color: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .login-card { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 380px; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
+        body { 
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            color: #1e293b;
+        }
+        .login-card { 
+            background: #ffffff; 
+            padding: 35px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px -5px rgba(22, 101, 52, 0.1), 0 8px 10px -6px rgba(22, 101, 52, 0.1); 
+            width: 100%; 
+            max-width: 420px; 
+            border: 1px solid #bbf7d0;
+        }
+        .brand-logo { text-align: center; margin-bottom: 24px; }
+        .brand-logo h2 { font-size: 1.5rem; color: #166534; font-weight: 700; }
+        .brand-logo p { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
         
-        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
-        .tab-btn { flex: 1; padding: 10px; background: none; border: none; font-size: 0.95rem; font-weight: bold; color: #64748b; cursor: pointer; transition: all 0.2s; }
-        .tab-btn.active { color: #2563eb; border-bottom: 2px solid #2563eb; margin-bottom: -2px; }
+        .auth-tabs { display: flex; margin-bottom: 24px; background: #f8fafc; padding: 4px; border-radius: 10px; border: 1px solid #e2e8f0; }
+        .tab-btn { flex: 1; padding: 10px; background: none; border: none; font-size: 0.9rem; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 8px; transition: all 0.3s ease; }
+        .tab-btn.active { background: #16a34a; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2); }
+        
         .auth-form { display: none; }
-        .auth-form.active { display: block; }
+        .auth-form.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #475569; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
-        .btn-login { width: 100%; background: #2563eb; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-login:hover { background: #1d4ed8; }
-        .btn-signup { background-color: #16a34a; }
-        .btn-signup:hover { background-color: #15803d; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; }
+        .form-group input { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none; transition: all 0.2s; background: #f8fafc; }
+        .form-group input:focus { border-color: #16a34a; background: #fff; box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15); }
         
-        .alert { padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem; }
-        .alert-danger { background: #fee2e2; color: #991b1b; }
-        .alert-success { background: #dcfce7; color: #166534; }
+        .btn-submit { width: 100%; background: #16a34a; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2); }
+        .btn-submit:hover { background: #15803d; }
+        
+        .alert { padding: 12px; border-radius: 8px; margin-bottom: 18px; font-size: 0.85rem; font-weight: 500; }
+        .alert-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     </style>
 </head>
-<body class="login-body">
+<body>
     <div class="login-card">
+        <div class="brand-logo">
+            <h2>🌿 E-Kantin Sehat</h2>
+            <p>Silakan masuk atau daftar untuk mulai memesan</p>
+        </div>
         
         <div class="auth-tabs">
             <button class="tab-btn <?= $active_tab === 'login' ? 'active' : ''; ?>" id="btn-login" onclick="switchTab('login')">Sign In</button>
@@ -118,7 +143,6 @@ if (!isset($_SESSION['role'])) :
 
         <!-- FORM SIGN IN -->
         <div id="login-form" class="auth-form <?= $active_tab === 'login' ? 'active' : ''; ?>">
-            <h2 style="text-align: center; margin-bottom: 15px; color: #1e293b;">Sign In Kantin</h2>
             <?php if (!empty($login_error)): ?>
                 <div class="alert alert-danger"><?= htmlspecialchars($login_error); ?></div>
             <?php endif; ?>
@@ -129,19 +153,18 @@ if (!isset($_SESSION['role'])) :
             <form method="POST">
                 <div class="form-group">
                     <label>Username</label>
-                    <input type="text" name="username" required autocomplete="off">
+                    <input type="text" name="username" placeholder="Masukkan username" required autocomplete="off">
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" name="password" required>
+                    <input type="password" name="password" placeholder="Masukkan password" required>
                 </div>
-                <button type="submit" name="login" class="btn-login">Sign In</button>
+                <button type="submit" name="login" class="btn-submit">Sign In</button>
             </form>
         </div>
 
         <!-- FORM REGISTER -->
         <div id="signup-form" class="auth-form <?= $active_tab === 'signup' ? 'active' : ''; ?>">
-            <h2 style="text-align: center; margin-bottom: 15px; color: #1e293b;">Register Akun Baru</h2>
             <?php if (!empty($register_error)): ?>
                 <div class="alert alert-danger"><?= htmlspecialchars($register_error); ?></div>
             <?php endif; ?>
@@ -153,16 +176,15 @@ if (!isset($_SESSION['role'])) :
                 </div>
                 <div class="form-group">
                     <label>Username</label>
-                    <input type="text" name="reg_username" placeholder="Buat username" required autocomplete="off">
+                    <input type="text" name="reg_username" placeholder="Buat username unik" required autocomplete="off">
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" name="reg_password" placeholder="Buat password" required>
+                    <input type="password" name="reg_password" placeholder="Buat password aman" required>
                 </div>
-                <button type="submit" name="register" class="btn-login btn-signup">Daftar Akun</button>
+                <button type="submit" name="register" class="btn-submit">Daftar Akun</button>
             </form>
         </div>
-
     </div>
 
     <script>
@@ -221,61 +243,73 @@ elseif ($_SESSION['role'] === 'admin') :
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Kantin</title>
+    <title>Dashboard Admin - E-Kantin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .admin-body { background-color: #f1f5f9; color: #334155; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .header h1 { font-size: 1.8rem; color: #1e293b; }
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-add { background-color: #2563eb; color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-weight: 500; }
-        .btn-add:hover { background-color: #1d4ed8; }
-        .btn-logout { background-color: #ef4444; color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-weight: 500; }
-        .btn-logout:hover { background-color: #dc2626; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f8fafc; color: #334155; padding: 30px; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: #ffffff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .header h1 { font-size: 1.5rem; color: #166534; font-weight: 700; }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        
+        .btn { text-decoration: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-add { background-color: #16a34a; color: #fff; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2); }
+        .btn-add:hover { background-color: #15803d; }
+        .btn-logout { background-color: #fee2e2; color: #991b1b; }
+        .btn-logout:hover { background-color: #fecaca; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #2563eb; }
-        .stat-card.green { border-left-color: #16a34a; }
-        .stat-card.orange { border-left-color: #f97316; }
-        .stat-card.purple { border-left-color: #9333ea; }
-        .stat-card h3 { font-size: 0.85rem; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-card p { font-size: 1.5rem; font-weight: bold; color: #0f172a; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 35px; }
+        .stat-card { background: #fff; padding: 22px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #16a34a; }
+        .stat-card.purple::before { background: #7c3aed; }
+        .stat-card.orange::before { background: #ea580c; }
+        .stat-card.blue::before { background: #0284c7; }
+        
+        .stat-card h3 { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 700; }
+        .stat-card p { font-size: 1.6rem; font-weight: 700; color: #0f172a; }
 
-        .section-title { font-size: 1.2rem; margin-bottom: 12px; color: #1e293b; }
-        .table-container { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; margin-bottom: 30px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-        th { background-color: #f8fafc; color: #475569; padding: 12px 16px; border-bottom: 2px solid #e2e8f0; font-weight: 600; }
-        td { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        .section-title { font-size: 1.15rem; margin-bottom: 15px; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        
+        .table-container { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow-x: auto; margin-bottom: 35px; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+        th { background-color: #f8fafc; color: #475569; padding: 14px 18px; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+        td { padding: 14px 18px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; }
+        tr:last-child td { border-bottom: none; }
         tr:hover { background-color: #f8fafc; }
-        .img-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; }
-        .badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600; }
-        .badge-kat { background: #e0f2fe; color: #0369a1; }
-        .badge-stok { background: #fef3c7; color: #d97706; }
-        .btn-action { text-decoration: none; font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; margin-right: 3px; display: inline-block; }
-        .btn-edit { background-color: #f59e0b; color: white; }
-        .btn-delete { background-color: #ef4444; color: white; }
+        
+        .img-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; display: inline-block; }
+        .badge-kat { background: #dcfce7; color: #166534; }
+        .badge-stok { background: #ffedd5; color: #c2410c; margin-left: 6px; }
+        
+        .btn-action { text-decoration: none; font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; font-weight: 600; margin-right: 4px; display: inline-block; transition: opacity 0.2s; }
+        .btn-edit { background-color: #fef08a; color: #854d0e; }
+        .btn-edit:hover { background-color: #fde047; }
+        .btn-delete { background-color: #fee2e2; color: #991b1b; }
+        .btn-delete:hover { background-color: #fecaca; }
     </style>
 </head>
-<body class="admin-body">
+<body>
 
     <div class="header">
-        <h1>Dashboard Admin Kantin</h1>
+        <h1>🌿 Dashboard Admin Kantin</h1>
         <div class="header-actions">
-            <a href="menu/tambah.php" class="btn-add">+ Tambah Menu Baru</a>
-            <a href="?action=logout" class="btn-logout">Sign Out (<?= htmlspecialchars($_SESSION['nama']); ?>)</a>
+            <a href="menu/tambah.php" class="btn btn-add">+ Tambah Menu Baru</a>
+            <a href="?action=logout" class="btn btn-logout">Sign Out (<?= htmlspecialchars($_SESSION['nama']); ?>)</a>
         </div>
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card green">
+        <div class="stat-card">
             <h3>Total Pendapatan</h3>
-            <p>Rp <?= number_format($total_pendapatan, 0, ',', '.'); ?></p>
+            <p style="color: #16a34a;">Rp <?= number_format($total_pendapatan, 0, ',', '.'); ?></p>
         </div>
         <div class="stat-card purple">
             <h3>Total Transaksi</h3>
             <p><?= $total_transaksi; ?></p>
         </div>
-        <div class="stat-card">
+        <div class="stat-card blue">
             <h3>Jumlah Menu</h3>
             <p><?= $total_menu; ?></p>
         </div>
@@ -285,7 +319,7 @@ elseif ($_SESSION['role'] === 'admin') :
         </div>
     </div>
 
-    <h2 class="section-title">Daftar Menu Kantin</h2>
+    <h2 class="section-title">📋 Daftar Menu Kantin</h2>
     <div class="table-container">
         <table>
             <thead>
@@ -301,10 +335,10 @@ elseif ($_SESSION['role'] === 'admin') :
             <tbody>
                 <?php if (!empty($data_menu)): foreach ($data_menu as $menu): ?>
                     <tr>
-                        <td><img src="../uploads/<?= htmlspecialchars($menu['foto']); ?>" alt="Foto" class="img-thumb" onerror="this.src='https://via.placeholder.com/45'"></td>
-                        <td><strong><?= htmlspecialchars($menu['nama_menu']); ?></strong></td>
+                        <td><img src="../uploads/<?= htmlspecialchars($menu['foto']); ?>" alt="Foto" class="img-thumb" onerror="this.src='https://via.placeholder.com/48'"></td>
+                        <td><strong style="color: #0f172a;"><?= htmlspecialchars($menu['nama_menu']); ?></strong></td>
                         <td><span class="badge badge-kat"><?= htmlspecialchars($menu['kategori']); ?></span></td>
-                        <td>Rp <?= number_format($menu['harga'], 0, ',', '.'); ?></td>
+                        <td><strong>Rp <?= number_format($menu['harga'], 0, ',', '.'); ?></strong></td>
                         <td>
                             <?= $menu['stok']; ?>
                             <?php if ($menu['stok'] < 5): ?>
@@ -317,13 +351,13 @@ elseif ($_SESSION['role'] === 'admin') :
                         </td>
                     </tr>
                 <?php endforeach; else: ?>
-                    <tr><td colspan="6" style="text-align:center;">Belum ada data menu di database.</td></tr>
+                    <tr><td colspan="6" style="text-align:center; color: #64748b; padding: 30px;">Belum ada data menu di database.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 
-    <h2 class="section-title">10 Transaksi Terakhir</h2>
+    <h2 class="section-title">⚡ 10 Transaksi Terakhir</h2>
     <div class="table-container">
         <table>
             <thead>
@@ -338,14 +372,14 @@ elseif ($_SESSION['role'] === 'admin') :
             <tbody>
                 <?php if (!empty($data_transaksi)): foreach ($data_transaksi as $tx): ?>
                     <tr>
-                        <td><strong><?= htmlspecialchars($tx['kode_transaksi']); ?></strong></td>
+                        <td><strong style="color: #16a34a;"><?= htmlspecialchars($tx['kode_transaksi']); ?></strong></td>
                         <td><?= htmlspecialchars($tx['nama_pembeli']); ?></td>
                         <td><?= htmlspecialchars($tx['item_dibeli'] ?? 'Tidak ada item'); ?></td>
                         <td><?= date('d/m/Y H:i', strtotime($tx['tanggal_transaksi'])); ?></td>
-                        <td><strong>Rp <?= number_format($tx['total_bayar'], 0, ',', '.'); ?></strong></td>
+                        <td><strong style="color: #0f172a;">Rp <?= number_format($tx['total_bayar'], 0, ',', '.'); ?></strong></td>
                     </tr>
                 <?php endforeach; else: ?>
-                    <tr><td colspan="5" style="text-align:center;">Belum ada data transaksi di database.</td></tr>
+                    <tr><td colspan="5" style="text-align:center; color: #64748b; padding: 30px;">Belum ada data transaksi di database.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -369,39 +403,48 @@ else :
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Menu - Kantin</title>
+    <title>Katalog Menu - E-Kantin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .user-body { background-color: #f8fafc; color: #334155; padding: 20px; }
-        .user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .user-header h1 { font-size: 1.4rem; color: #1e293b; }
-        .btn-logout { background-color: #ef4444; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; }
-        .btn-logout:hover { background-color: #dc2626; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f8fafc; color: #334155; padding: 30px; }
         
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .menu-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
-        .menu-card img { width: 100%; height: 150px; object-fit: cover; }
-        .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .badge-kat { background: #e0f2fe; color: #0369a1; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600; }
-        .menu-title { font-size: 1.1rem; font-weight: bold; color: #0f172a; margin-top: 5px; margin-bottom: 5px; }
-        .menu-price { font-size: 1rem; color: #16a34a; font-weight: bold; margin-bottom: 10px; }
-        .btn-buy { background-color: #2563eb; color: #fff; text-decoration: none; text-align: center; padding: 8px; border-radius: 6px; font-weight: 500; display: block; margin-top: 10px; }
-        .btn-buy:hover { background-color: #1d4ed8; }
+        .user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .user-header h1 { font-size: 1.4rem; color: #166534; font-weight: 700; }
+        
+        .btn-logout { background-color: #fee2e2; color: #991b1b; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.875rem; transition: background 0.2s; }
+        .btn-logout:hover { background-color: #fecaca; }
+        
+        .catalog-title { font-size: 1.25rem; color: #1e293b; margin-bottom: 20px; font-weight: 700; }
+        
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        .menu-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
+        .menu-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+        
+        .menu-card img { width: 100%; height: 160px; object-fit: cover; }
+        .card-body { padding: 18px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        .badge-kat { background: #dcfce7; color: #166534; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; display: inline-block; margin-bottom: 8px; }
+        .menu-title { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .menu-price { font-size: 1.05rem; color: #16a34a; font-weight: 700; margin-bottom: 15px; }
+        
+        .btn-buy { background-color: #16a34a; color: #fff; text-decoration: none; text-align: center; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.875rem; display: block; transition: background 0.2s; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2); }
+        .btn-buy:hover { background-color: #15803d; }
     </style>
 </head>
-<body class="user-body">
+<body>
 
     <div class="user-header">
-        <h1>Selamat Datang, <?= htmlspecialchars($_SESSION['nama']); ?>! 👋</h1>
+        <h1>👋 Selamat Datang, <?= htmlspecialchars($_SESSION['nama']); ?>!</h1>
         <a href="?action=logout" class="btn-logout">Sign Out</a>
     </div>
 
-    <h2 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 15px;">Daftar Menu Makanan & Minuman</h2>
+    <h2 class="catalog-title">🍽️ Daftar Menu Makanan & Minuman Tersedia</h2>
 
     <div class="menu-grid">
         <?php if (!empty($data_menu_user)): foreach ($data_menu_user as $item): ?>
             <div class="menu-card">
-                <img src="../uploads/<?= htmlspecialchars($item['foto']); ?>" alt="Foto Menu" onerror="this.src='https://via.placeholder.com/220x150'">
+                <img src="../uploads/<?= htmlspecialchars($item['foto']); ?>" alt="Foto Menu" onerror="this.src='https://via.placeholder.com/240x160'">
                 <div class="card-body">
                     <div>
                         <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
@@ -412,7 +455,7 @@ else :
                 </div>
             </div>
         <?php endforeach; else: ?>
-            <p style="grid-column: 1 / -1; text-align: center; color: #64748b;">Belum ada menu yang tersedia saat ini.</p>
+            <p style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px;">Belum ada menu yang tersedia saat ini.</p>
         <?php endif; ?>
     </div>
 
