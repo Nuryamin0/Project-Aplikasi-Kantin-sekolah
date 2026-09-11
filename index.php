@@ -2,7 +2,7 @@
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+mysqli_report(MYSQLI_REPORT_OFF);
 
 include __DIR__ . '/config/koneksi.php';
 
@@ -22,19 +22,21 @@ mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS users (
 
 // Buat akun admin awal jika tabel users masih kosong
 $cek_user = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM users");
-$total_user = mysqli_fetch_assoc($cek_user)['total'] ?? 0;
+$total_user = ($cek_user) ? (mysqli_fetch_assoc($cek_user)['total'] ?? 0) : 0;
 if ($total_user == 0) {
     $admin_pass = password_hash('admin123', PASSWORD_DEFAULT);
     $stmt_seed = mysqli_prepare($koneksi, "INSERT INTO users (username, password, nama_lengkap, role) VALUES ('admin', ?, 'Administrator Kantin', 'admin')");
-    mysqli_stmt_bind_param($stmt_seed, "s", $admin_pass);
-    mysqli_stmt_execute($stmt_seed);
-    mysqli_stmt_close($stmt_seed);
+    if ($stmt_seed) {
+        mysqli_stmt_bind_param($stmt_seed, "s", $admin_pass);
+        mysqli_stmt_execute($stmt_seed);
+        mysqli_stmt_close($stmt_seed);
+    }
 }
 
 // 1. PROSES LOGOUT
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     session_destroy();
-    header("Location: " . $_SERVER['PHP_SELF']);
+    header("Location: index.php");
     exit();
 }
 
@@ -114,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                 $_SESSION['nama']     = $user['nama_lengkap'] ?? $user['username'];
                 $_SESSION['role']     = $user['role']; // 'admin' atau 'user'
 
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location: index.php");
                 exit();
             } else {
                 $login_error = "Password yang Anda masukkan salah!";
@@ -376,7 +378,11 @@ elseif ($_SESSION['role'] === 'admin') :
                     <?php foreach ($data_menu as $menu): ?>
                         <tr>
                             <td>
-                                <img src="menu/uploads/<?= htmlspecialchars($menu['foto'] ?? ''); ?>" alt="Foto" class="img-thumb" onerror="this.src='https://via.placeholder.com/45'">
+                                <?php if (!empty($menu['foto'])): ?>
+                                    <img src="menu/uploads/<?= htmlspecialchars($menu['foto']); ?>" alt="Foto" class="img-thumb" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'45\' height=\'45\' viewBox=\'0 0 45 45\'%3E%3Crect width=\'45\' height=\'45\' fill=\'%23e2e8f0\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'20\'%3E🍽️%3C/text%3E%3C/svg%3E';">
+                                <?php else: ?>
+                                    <div style="width: 45px; height: 45px; background: #e2e8f0; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem;">🍽️</div>
+                                <?php endif; ?>
                             </td>
                             <td><strong><?= htmlspecialchars($menu['nama_menu'] ?? $menu['nama_produk'] ?? ''); ?></strong></td>
                             <td><span class="badge badge-kat"><?= htmlspecialchars($menu['kategori'] ?? ''); ?></span></td>
@@ -403,7 +409,7 @@ elseif ($_SESSION['role'] === 'admin') :
     <!-- Tabel Transaksi Terakhir -->
     <h2 class="section-title">10 Transaksi Terakhir</h2>
     <div class="table-container">
-        <table>
+        <table> 
             <thead>
                 <tr>
                     <th>Kode TX</th>
@@ -471,7 +477,11 @@ else :
         <?php if (!empty($data_menu_user)): ?>
             <?php foreach ($data_menu_user as $item): ?>
                 <div class="menu-card">
-                    <img src="menu/uploads/<?= htmlspecialchars($item['foto'] ?? ''); ?>" alt="Foto Menu" onerror="this.src='https://via.placeholder.com/220x150'">
+                    <?php if (!empty($item['foto'])): ?>
+                        <img src="menu/uploads/<?= htmlspecialchars($item['foto']); ?>" alt="Foto Menu" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'220\' height=\'150\' viewBox=\'0 0 220 150\'%3E%3Crect width=\'220\' height=\'150\' fill=\'%23e2e8f0\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'40\'%3E🍽️%3C/text%3E%3C/svg%3E';">
+                    <?php else: ?>
+                        <div style="height: 150px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🍽️</div>
+                    <?php endif; ?>
                     <div class="card-body">
                         <div>
                             <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
