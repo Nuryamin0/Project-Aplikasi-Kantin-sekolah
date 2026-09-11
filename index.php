@@ -403,7 +403,7 @@ elseif ($_SESSION['role'] === 'admin') :
     <!-- Tabel Transaksi Terakhir -->
     <h2 class="section-title">10 Transaksi Terakhir</h2>
     <div class="table-container">
-        <table>
+        <table> 
             <thead>
                 <tr>
                     <th>Kode TX</th>
