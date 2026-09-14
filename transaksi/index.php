@@ -28,8 +28,11 @@ $hasil = mysqli_query($koneksi, $query);
     <h1>Riwayat Transaksi Kantin</h1>
     <?php require __DIR__ . '/../includes/nav_admin.php'; ?>
 
+<<<<<<< HEAD
     <a href="tambah.php" class="btn-tambah" style="background-color: #16a34a;">+ Input Transaksi Baru (Kasir)</a>
 
+=======
+>>>>>>> main
     <div class="table-container">
         <table>
             <thead>
