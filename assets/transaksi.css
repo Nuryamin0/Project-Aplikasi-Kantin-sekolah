@@ -1,0 +1,404 @@
+/* ========================================
+   KANTIN FRESH 🌿
+   Green • Fresh • Clean • School Canteen
+======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ========================================
+   BODY
+======================================== */
+body {
+    font-family: "Poppins", sans-serif;
+    background: #f3f9f1;
+    color: #29432f;
+    min-height: 100vh;
+    padding: 35px 50px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ========================================
+   HEADER
+======================================== */
+h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #245c36;
+    margin-bottom: 7px;
+}
+
+/* Daun setelah judul */
+h1::after {
+    content: " 🌿";
+}
+
+/* Deskripsi otomatis */
+body::before {
+    content: "Fresh • Sehat • Enak • Bersahabat";
+    display: block;
+    color: #719477;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 25px;
+}
+
+/* ========================================
+   NAVIGASI
+======================================== */
+.navigasi {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+.navigasi a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 17px;
+    background: #ffffff;
+    color: #356044;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #d4e7d2;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(48, 92, 56, 0.08);
+    transition: 0.25s ease;
+}
+.navigasi a:hover {
+    background: #e8f5e6;
+    color: #245c36;
+    border-color: #9dcc9c;
+    transform: translateY(-3px);
+    box-shadow: 0 7px 15px rgba(48, 92, 56, 0.13);
+}
+
+/* ========================================
+   TOMBOL TAMBAH
+======================================== */
+.btn-tambah {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 19px;
+    background: #4caf50;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 4px 0 #37863b;
+    margin-bottom: 24px;
+    transition: 0.2s ease;
+}
+
+.btn-tambah:hover {
+    background: #43a047;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #37863b;
+}
+
+.btn-tambah:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #37863b;
+}
+
+/* ========================================
+   TABLE
+======================================== */
+.table-transaksi {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+    border: 1px solid #d9e9d7;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(44, 84, 50, 0.08);
+}
+
+/* ========================================
+   TABLE HEADER
+======================================== */
+.table-transaksi thead th {
+    background: #dff0dc;
+    color: #285936;
+    padding: 15px 13px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 2px solid #c4dfc1;
+}
+
+/* Sudut kiri atas */
+.table-transaksi thead th:first-child {
+    border-top-left-radius: 18px;
+}
+
+/* Sudut kanan atas */
+.table-transaksi thead th:last-child {
+    border-top-right-radius: 18px;
+}
+
+/* ========================================
+   TABLE BODY
+======================================== */
+.table-transaksi tbody td {
+    padding: 14px 13px;
+    text-align: center;
+    font-size: 13px;
+    border-bottom: 1px solid #edf3eb;
+    color: #405746;
+}
+
+/* Animasi baris */
+.table-transaksi tbody tr {
+    transition: 0.2s ease;
+}
+
+/* Hover baris */
+.table-transaksi tbody tr:hover {
+    background: #f7fcf6;
+}
+
+/* Hilangkan border baris terakhir */
+.table-transaksi tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ========================================
+   NOMOR
+======================================== */
+.table-transaksi tbody td:first-child {
+    color: #6b8c70;
+    font-weight: 600;
+    width: 60px;
+}
+
+/* ========================================
+   KODE TRANSAKSI
+======================================== */
+.table-transaksi tbody td:nth-child(2) {
+    color: #285936;
+    font-weight: 700;
+}
+
+/* ========================================
+   NAMA PEMBELI
+======================================== */
+.table-transaksi tbody td:nth-child(3) {
+    color: #405746;
+    font-weight: 600;
+}
+
+/* ========================================
+   TANGGAL
+======================================== */
+.table-transaksi tbody td:nth-child(4) {
+    color: #628069;
+}
+
+/* ========================================
+   TOTAL BAYAR
+======================================== */
+.table-transaksi tbody td:nth-child(5) {
+    color: #388e3c;
+    font-weight: 800;
+}
+
+/* ========================================
+   TOMBOL DETAIL
+======================================== */
+.detail {
+    display: inline-block;
+    padding: 7px 12px;
+    background: #e8f5e6;
+    color: #357a38 !important;
+    border: 1px solid #b9dcb5;
+    border-radius: 9px;
+    text-decoration: none !important;
+    font-size: 11px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+.detail:hover {
+    background: #4caf50;
+    color: #ffffff !important;
+    border-color: #4caf50;
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   TOTAL BAYAR
+======================================== */
+.total-bayar {
+    color: #388e3c !important;
+    font-weight: 800;
+}
+
+/* ========================================
+   DATA KOSONG
+======================================== */
+
+.table-transaksi tbody td[colspan="6"] {
+    padding: 45px 20px;
+    background: #fbfdfb;
+    color: #8a9d8c;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ========================================
+   DEKORASI FRESH
+======================================== */
+body::after {
+    content: "🥬   🥕   🍅   🌽   🥤";
+    position: fixed;
+    right: 25px;
+    bottom: 18px;
+    font-size: 24px;
+    opacity: 0.10;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ========================================
+   TABLE RESPONSIVE
+======================================== */
+@media (max-width: 900px) {
+    body {
+        padding: 25px 20px;
+    }
+    h1 {
+        font-size: 27px;
+    }
+    .table-transaksi {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .navigasi {
+        gap: 8px;
+    }
+    .navigasi a {
+        padding: 10px 13px;
+        font-size: 12px;
+    }
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+@media (max-width: 600px) {
+    body {
+        padding: 20px 12px;
+    }
+    h1 {
+        font-size: 23px;
+    }
+    body::before {
+        font-size: 11px;
+    }
+    .navigasi {
+        flex-direction: column;
+    }
+    .navigasi a {
+        width: 100%;
+        justify-content: center;
+    }
+    .btn-tambah {
+        width: 100%;
+        justify-content: center;
+    }
+    .table-transaksi {
+        font-size: 12px;
+    }
+    .table-transaksi th,
+    .table-transaksi td {
+        padding: 12px 10px;
+    }
+}
+/* ========================================
+   TABEL CARD RESPONSIF (MOBILE)
+======================================== */
+@media (max-width: 600px) {
+    /* Sembunyikan header tabel */
+    .table-transaksi thead {
+        display: none;
+    }
+
+    /* Ubah elemen tabel menjadi block */
+    .table-transaksi, 
+    .table-transaksi tbody, 
+    .table-transaksi tr, 
+    .table-transaksi td {
+        display: block;
+        width: 100%;
+        white-space: normal;
+    }
+
+    /* Reset kontainer tabel luar */
+    .table-transaksi {
+        border: none;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    /* BENTUK KARTU (TR) */
+    .table-transaksi tbody tr {
+        background: #ffffff;
+        border: 1px solid #d9e9d7;
+        border-radius: 18px;
+        box-shadow: 0 8px 20px rgba(44, 84, 50, 0.08);
+        margin-bottom: 16px;
+        padding: 8px 14px;
+    }
+
+    .table-transaksi tbody tr:hover {
+        background: #f7fcf6;
+        transform: translateY(-2px);
+    }
+
+    /* BARIS DALAM KARTU (TD) */
+    .table-transaksi tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right !important;
+        padding: 10px 4px;
+        border-bottom: 1px solid #edf3eb;
+        font-size: 13px;
+    }
+
+    /* Reset lebar kolom nomor */
+    .table-transaksi tbody td:first-child {
+        width: 100%;
+    }
+
+    /* MENAMPILKAN JUDUL KOLOM VIA ATRIBUT data-label */
+    .table-transaksi tbody td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #285936;
+        text-align: left;
+        padding-right: 15px;
+    }
+
+    /* Tombol aksi full-width di bagian bawah kartu */
+    .table-transaksi tbody td:last-child {
+        border-bottom: none;
+        padding-top: 12px;
+    }
+
+    .detail {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 9px 0;
+    }
+}
