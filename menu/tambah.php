@@ -49,7 +49,7 @@ if (isset($_POST['submit'])) {
 
     <h2>Tambah Menu Kantin</h2>
 
-    <p><a href="../index.php">← Kembali</a></p>
+    
 
     <?php if (!empty($error)): ?>
         <p style="color: red;"><?= htmlspecialchars($error); ?></p>
@@ -88,6 +88,7 @@ if (isset($_POST['submit'])) {
 
         <p>
             <button type="submit" name="submit">Simpan</button>
+            <p><a href="../index.php">← Kembali</a></p>
         </p>
     </form>
 

@@ -233,19 +233,6 @@ if (!isset($_SESSION['role'])) :
                     </div>
 
                     <div class="form-group">
-                        <label>Daftar Sebagai (Peran)</label>
-                        <div class="role-selector">
-                            <label class="role-option">
-                                <input type="radio" name="role" value="user" <?= (!isset($_POST['role']) || $_POST['role'] === 'user') ? 'checked' : ''; ?>>
-                                <span class="role-card">
-                                    <span class="role-title">🛍️ Pembeli / Siswa</span>
-                                    <span class="role-desc">Pesan makanan & lihat menu</span>
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
                         <label for="reg-password">Password</label>
                         <div class="input-with-icon">
                             <span class="input-icon">🔒</span>
@@ -334,7 +321,7 @@ elseif ($_SESSION['role'] === 'admin') :
         <h1>Dashboard Admin Kantin</h1>
         <div class="header-actions">
             <a href="menu/tambah.php" class="btn-add">+ Tambah Menu Baru</a>
-            <a href="transaksi/tambah.php" class="btn-add" style="background-color:#16a34a;">+ Kasir Transaksi</a>
+            <a href="transaksi/index.php" class="btn-add" style="background-color:#16a34a;">riwayat Transaksi</a>
             <a href="?action=logout" class="btn-logout">Logout (<?= htmlspecialchars($_SESSION['nama']); ?>)</a>
         </div>
     </div>

@@ -75,8 +75,6 @@ if (isset($_POST['submit'])) {
     <h1>Edit Data Menu</h1>
     <?php if (file_exists(__DIR__ . '/../includes/nav_admin.php')) require __DIR__ . '/../includes/nav_admin.php'; ?>
 
-    <a href="../index.php" class="btn-tambah" style="background-color: #64748b;">← Kembali ke Daftar Menu</a>
-
     <?php if (!empty($error)): ?>
         <div class="alert alert-danger" style="margin-top: 15px;">
             <span class="alert-icon">⚠️</span>
@@ -125,7 +123,7 @@ if (isset($_POST['submit'])) {
 
             <div style="margin-top: 20px; display: flex; gap: 10px;">
                 <button type="submit" name="submit" class="btn-primary" style="margin-top: 0; flex: 1;">Update Data Menu</button>
-                <a href="../index.php" class="btn-action" style="background-color: #e2e8f0; color: #334155; padding: 11px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">Batal</a>
+
             </div>
         </form>
     </div>
