@@ -435,7 +435,7 @@ elseif ($_SESSION['role'] === 'admin') :
 </html>
 
 <?php
-// 6. CABANG 3: KATALOG PEMBELI (Jika Role = 'user')
+// 6. CABANG 3: KATALOG PEMBELI & FLOATING CART (Jika Role = 'user')
 else :
 
     // Query menu yang stoknya masih ada
@@ -454,6 +454,176 @@ else :
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Katalog Menu - Kantin Sekolah</title>
     <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
+    <style>
+        /* CSS Tambahan untuk Floating Cart & Modal Drawer */
+        .catalog-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Tombol Ikon Keranjang Mengambang (Floating Button) */
+        .floating-cart-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #16a34a;
+            color: white;
+            border: none;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.6rem;
+            z-index: 999;
+            transition: transform 0.2s ease, background-color 0.2s;
+        }
+        .floating-cart-btn:hover {
+            transform: scale(1.1);
+            background-color: #15803d;
+        }
+
+        /* Badge Angka di Ikon */
+        .cart-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #dc2626;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 50px;
+            border: 2px solid white;
+        }
+
+        /* Overlay Gelap di Belakang Pop-up */
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .cart-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Kotak Pop-up / Drawer Keranjang (Awalnya tersembunyi di kanan) */
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 100%;
+            max-width: 380px;
+            height: 100%;
+            background: white;
+            z-index: 1001;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-drawer.open {
+            right: 0;
+        }
+
+        /* Header dalam Drawer Keranjang */
+        .cart-drawer-header {
+            padding: 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-drawer-header h3 {
+            font-size: 1.1rem;
+            color: #1e293b;
+            margin: 0;
+        }
+        .close-drawer-btn {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .close-drawer-btn:hover {
+            color: #000;
+        }
+
+        /* Daftar Item di dalam Drawer */
+        .cart-drawer-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .cart-item-row .item-info {
+            font-size: 0.9rem;
+        }
+        .cart-item-row .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cart-item-row button {
+            padding: 2px 8px;
+            background: #e2e8f0;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        /* Footer / Bagian Bawah Drawer (Total & Checkout) */
+        .cart-drawer-footer {
+            padding: 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+        .summary-flex {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: #1e293b;
+        }
+        .btn-checkout-main {
+            width: 100%;
+            background-color: #16a34a;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        .btn-checkout-main:hover {
+            background-color: #15803d;
+        }
+    </style>
 </head>
 <body>
 
@@ -465,31 +635,172 @@ else :
         <a href="?action=logout" class="btn-logout">Logout</a>
     </div>
 
-    <h2 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 15px;">Daftar Menu Makanan & Minuman Tersedia</h2>
+    <!-- Katalog Menu Utama (Full Lebar) -->
+    <div class="catalog-container">
+        <h2 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 15px;">Daftar Menu Makanan & Minuman Tersedia</h2>
 
-    <div class="menu-grid">
-        <?php if (!empty($data_menu_user)): ?>
-            <?php foreach ($data_menu_user as $item): ?>
-                <div class="menu-card">
-                    <img src="menu/uploads/<?= htmlspecialchars($item['foto'] ?? ''); ?>" alt="Foto Menu" onerror="this.src='https://via.placeholder.com/220x150'">
-                    <div class="card-body">
-                        <div>
-                            <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
-                            <div class="menu-title"><?= htmlspecialchars($item['nama_menu'] ?? $item['nama_produk'] ?? ''); ?></div>
-                            <div class="menu-price">Rp <?= number_format($item['harga'], 0, ',', '.'); ?></div>
-                            <small style="color: #64748b;">Sisa stok: <strong><?= $item['stok']; ?></strong></small>
+        <div class="menu-grid">
+            <?php if (!empty($data_menu_user)): ?>
+                <?php foreach ($data_menu_user as $item): ?>
+                    <div class="menu-card">
+                        <img src="menu/uploads/<?= htmlspecialchars($item['foto'] ?? ''); ?>" alt="Foto Menu" onerror="this.src='https://via.placeholder.com/220x150'">
+                        <div class="card-body">
+                            <div>
+                                <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
+                                <div class="menu-title"><?= htmlspecialchars($item['nama_menu'] ?? $item['nama_produk'] ?? ''); ?></div>
+                                <div class="menu-price">Rp <?= number_format($item['harga'], 0, ',', '.'); ?></div>
+                                <small style="color: #64748b;">Sisa stok: <strong><?= $item['stok']; ?></strong></small>
+                            </div>
+                            <button type="button" class="btn-buy" onclick="addToCart(<?= $item['id_menu']; ?>, '<?= htmlspecialchars(addslashes($item['nama_menu'] ?? '')); ?>', <?= $item['harga']; ?>, <?= $item['stok']; ?>)">
+                                + Tambah ke Keranjang
+                            </button>
                         </div>
-                        <a href="transaksi/tambah.php" class="btn-buy">+ Pesan Menu</a>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px; background: #fff; border-radius: 8px;">
-                Belum ada menu yang tersedia saat ini.
-            </p>
-        <?php endif; ?>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px; background: #fff; border-radius: 8px;">
+                    Belum ada menu yang tersedia saat ini.
+                </p>
+            <?php endif; ?>
+        </div>
     </div>
 
+    <!-- Tombol Ikon Keranjang Mengambang di Pojok Kanan Bawah -->
+    <button type="button" class="floating-cart-btn" onclick="toggleCartDrawer()" title="Buka Keranjang">
+        🛒
+        <span class="cart-badge" id="cart-counter">0</span>
+    </button>
+
+    <!-- Overlay Gelap -->
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCartDrawer()"></div>
+
+    <!-- Kotak Pop-up / Drawer Keranjang Samping -->
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <h3>🛒 Keranjang Pesanan</h3>
+            <button type="button" class="close-drawer-btn" onclick="toggleCartDrawer()">&times;</button>
+        </div>
+        
+        <div class="cart-drawer-body" id="cart-items-container">
+            <p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 40px 0;">Keranjang masih kosong</p>
+        </div>
+        
+        <div class="cart-drawer-footer">
+            <div class="summary-flex">
+                <span>Total:</span>
+                <strong id="cart-total" style="color: #16a34a;">Rp 0</strong>
+            </div>
+            <button type="button" class="btn-checkout-main" onclick="checkoutOrder()">
+                Proses Pesanan Sekarang
+            </button>
+        </div>
+    </div>
+
+    <!-- Script JavaScript Interaktif -->
+    <script>
+        let cart = [];
+
+        // Fungsi untuk membuka/menutup panel keranjang (Drawer)
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cartDrawer');
+            const overlay = document.getElementById('cartOverlay');
+            
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function addToCart(id, name, price, maxStock) {
+            const existingItem = cart.find(item => item.id === id);
+            
+            if (existingItem) {
+                if (existingItem.quantity < maxStock) {
+                    existingItem.quantity += 1;
+                } else {
+                    alert("Jumlah pesanan melebihi stok yang tersedia!");
+                    return;
+                }
+            } else {
+                cart.push({ id, name, price, quantity: 1, maxStock });
+            }
+            
+            updateCartUI();
+            
+            // Efek opsional: Otomatis buka keranjang saat pertama kali item dimasukkan (atau biarkan tertutup)
+            // toggleCartDrawer(); 
+        }
+
+        function updateQuantity(id, amount) {
+            const item = cart.find(item => item.id === id);
+            if (item) {
+                item.quantity += amount;
+                if (item.quantity > item.maxStock) {
+                    item.quantity = item.maxStock;
+                    alert("Jumlah pesanan mencapai batas stok!");
+                }
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            updateCartUI();
+        }
+
+        function calculateTotal() {
+            return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const totalElement = document.getElementById('cart-total');
+            const counterElement = document.getElementById('cart-counter');
+            
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 40px 0;">Keranjang masih kosong</p>';
+                totalElement.innerText = 'Rp 0';
+                counterElement.innerText = '0';
+                return;
+            }
+            
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            counterElement.innerText = totalItems;
+            
+            cart.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'cart-item-row';
+                row.innerHTML = `
+                    <div class="item-info">
+                        <strong>${item.name}</strong><br>
+                        <small style="color: #64748b;">Rp ${item.price.toLocaleString('id-ID')} x ${item.quantity}</small>
+                    </div>
+                    <div class="item-controls">
+                        <button type="button" onclick="updateQuantity(${item.id}, -1)">-</button>
+                        <span style="font-size: 0.9rem; min-width: 15px; text-align: center;">${item.quantity}</span>
+                        <button type="button" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+            
+            totalElement.innerText = `Rp ${calculateTotal().toLocaleString('id-ID')}`;
+        }
+
+        function checkoutOrder() {
+            if (cart.length === 0) {
+                alert("Keranjang belanja Anda masih kosong!");
+                return;
+            }
+            
+            const total = calculateTotal();
+            alert(`Pesanan berhasil dibuat!\nTotal pembayaran: Rp ${total.toLocaleString('id-ID')}`);
+            
+            cart = [];
+            updateCartUI();
+            toggleCartDrawer(); // Tutup keranjang setelah checkout
+        }
+    </script>
 </body>
 </html>
 
