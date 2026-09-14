@@ -31,11 +31,7 @@ if (isset($_POST['submit'])) {
 
     if (mysqli_stmt_execute($stmt)) {
         mysqli_stmt_close($stmt);
-<<<<<<< HEAD
-        header("Location: index.php");
-=======
         header("Location: ../index.php");
->>>>>>> main
         exit();
     } else {
         $error = "Data gagal ditambahkan: " . mysqli_error($koneksi);
@@ -47,7 +43,6 @@ if (isset($_POST['submit'])) {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-<<<<<<< HEAD
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Menu Kantin</title>
     <link rel="stylesheet" href="../assets/style.css">
@@ -56,8 +51,6 @@ if (isset($_POST['submit'])) {
 
     <h1>Tambah Menu Kantin</h1>
     <?php require __DIR__ . '/../includes/nav_admin.php'; ?>
-
-    <a href="index.php" class="btn-tambah" style="background-color: #64748b;">← Kembali ke Daftar Menu</a>
 
     <?php if (!empty($error)): ?>
         <div class="alert alert-danger" style="margin-top: 15px;">
@@ -104,56 +97,6 @@ if (isset($_POST['submit'])) {
             </div>
         </form>
     </div>
-=======
-    <title>Tambah Menu</title>
-</head>
-<body>
-
-    <h2>Tambah Menu Kantin</h2>
-
-    
-
-    <?php if (!empty($error)): ?>
-        <p style="color: red;"><?= htmlspecialchars($error); ?></p>
-    <?php endif; ?>
-
-    <form action="tambah.php" method="POST" enctype="multipart/form-data">
-        <p>
-            <label for="nama_menu">Nama Menu:</label><br>
-            <input type="text" id="nama_menu" name="nama_menu" required>
-        </p>
-
-        <p>
-            <label for="kategori">Kategori:</label><br>
-            <select id="kategori" name="kategori" required>
-                <option value="">-- Pilih Kategori --</option>
-                <option value="Makanan">Makanan</option>
-                <option value="Minuman">Minuman</option>
-                <option value="Cemilan">Cemilan</option>
-            </select>
-        </p>
-
-        <p>
-            <label for="harga">Harga (Rp):</label><br>
-            <input type="number" id="harga" name="harga" min="0" required>
-        </p>
-
-        <p>
-            <label for="stok">Stok Awal:</label><br>
-            <input type="number" id="stok" name="stok" min="0" required>
-        </p>
-
-        <p>
-            <label for="foto">Foto Menu:</label><br>
-            <input type="file" id="foto" name="foto" accept="image/*">
-        </p>
-
-        <p>
-            <button type="submit" name="submit">Simpan</button>
-            <p><a href="../index.php">← Kembali</a></p>
-        </p>
-    </form>
->>>>>>> main
 
 </body>
 </html>

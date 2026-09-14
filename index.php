@@ -632,12 +632,15 @@ else :
     <div class="catalog-container">
         <h2 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 15px;">Daftar Menu Makanan & Minuman Tersedia</h2>
 
-<<<<<<< HEAD
         <div class="menu-grid">
             <?php if (!empty($data_menu_user)): ?>
                 <?php foreach ($data_menu_user as $item): ?>
                     <div class="menu-card">
-                        <img src="menu/uploads/<?= htmlspecialchars($item['foto'] ?? ''); ?>" alt="Foto Menu" onerror="this.src='https://via.placeholder.com/220x150'">
+                        <?php if (!empty($item['foto'])): ?>
+                            <img src="menu/uploads/<?= htmlspecialchars($item['foto']); ?>" alt="Foto Menu" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'220\' height=\'150\' viewBox=\'0 0 220 150\'%3E%3Crect width=\'220\' height=\'150\' fill=\'%23e2e8f0\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'40\'%3E🍽️%3C/text%3E%3C/svg%3E';">
+                        <?php else: ?>
+                            <div style="height: 150px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🍽️</div>
+                        <?php endif; ?>
                         <div class="card-body">
                             <div>
                                 <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
@@ -648,23 +651,6 @@ else :
                             <button type="button" class="btn-buy" onclick="addToCart(<?= $item['id_menu']; ?>, '<?= htmlspecialchars(addslashes($item['nama_menu'] ?? '')); ?>', <?= $item['harga']; ?>, <?= $item['stok']; ?>)">
                                 + Tambah ke Keranjang
                             </button>
-=======
-    <div class="menu-grid">
-        <?php if (!empty($data_menu_user)): ?>
-            <?php foreach ($data_menu_user as $item): ?>
-                <div class="menu-card">
-                    <?php if (!empty($item['foto'])): ?>
-                        <img src="menu/uploads/<?= htmlspecialchars($item['foto']); ?>" alt="Foto Menu" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'220\' height=\'150\' viewBox=\'0 0 220 150\'%3E%3Crect width=\'220\' height=\'150\' fill=\'%23e2e8f0\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'40\'%3E🍽️%3C/text%3E%3C/svg%3E';">
-                    <?php else: ?>
-                        <div style="height: 150px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🍽️</div>
-                    <?php endif; ?>
-                    <div class="card-body">
-                        <div>
-                            <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
-                            <div class="menu-title"><?= htmlspecialchars($item['nama_menu'] ?? $item['nama_produk'] ?? ''); ?></div>
-                            <div class="menu-price">Rp <?= number_format($item['harga'], 0, ',', '.'); ?></div>
-                            <small style="color: #64748b;">Sisa stok: <strong><?= $item['stok']; ?></strong></small>
->>>>>>> main
                         </div>
                     </div>
                 <?php endforeach; ?>
