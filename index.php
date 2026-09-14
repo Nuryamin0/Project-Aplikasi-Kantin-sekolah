@@ -2,7 +2,7 @@
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+mysqli_report(MYSQLI_REPORT_OFF);
 
 include __DIR__ . '/config/koneksi.php';
 
@@ -10,198 +10,287 @@ if (!isset($koneksi) || !$koneksi) {
     die("Koneksi database gagal. Cek config/koneksi.php");
 }
 
-// ------------------------------------------------------------------
-// 1. PROSES SIGN OUT / LOGOUT
-// ------------------------------------------------------------------
+// 0. AUTO-MIGRATION: Pastikan tabel `users` tersedia di database
+mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS users (
+    id_user INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    nama_lengkap VARCHAR(100) NOT NULL,
+    role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+// Buat akun admin awal jika tabel users masih kosong
+$cek_user = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM users");
+$total_user = ($cek_user) ? (mysqli_fetch_assoc($cek_user)['total'] ?? 0) : 0;
+if ($total_user == 0) {
+    $admin_pass = password_hash('admin123', PASSWORD_DEFAULT);
+    $stmt_seed = mysqli_prepare($koneksi, "INSERT INTO users (username, password, nama_lengkap, role) VALUES ('admin', ?, 'Administrator Kantin', 'admin')");
+    if ($stmt_seed) {
+        mysqli_stmt_bind_param($stmt_seed, "s", $admin_pass);
+        mysqli_stmt_execute($stmt_seed);
+        mysqli_stmt_close($stmt_seed);
+    }
+}
+
+// 1. PROSES LOGOUT
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     session_destroy();
-    header("Location: " . $_SERVER['PHP_SELF']);
+    header("Location: index.php");
     exit();
 }
 
-// ------------------------------------------------------------------
-// 2. PROSES SIGN IN / LOGIN
-// ------------------------------------------------------------------
 $login_error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
-    $username = mysqli_real_escape_string($koneksi, $_POST['username']);
-    $password = $_POST['password'];
-
-    $q_user = mysqli_query($koneksi, "SELECT * FROM users WHERE username = '$username'");
-    if ($q_user && mysqli_num_rows($q_user) > 0) {
-        $user = mysqli_fetch_assoc($q_user);
-        
-        if (password_verify($password, $user['password']) || $password === $user['password']) {
-            $_SESSION['id_user']  = $user['id_user'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['nama']     = $user['nama_lengkap'] ?? $user['username'];
-            $_SESSION['role']     = $user['role'];
-
-            header("Location: " . $_SERVER['PHP_SELF']);
-            exit();
-        } else {
-            $login_error = "Password salah!";
-        }
-    } else {
-        $login_error = "Username tidak ditemukan!";
-    }
-}
-
-// ------------------------------------------------------------------
-// 3. PROSES REGISTER / SIGN UP
-// ------------------------------------------------------------------
 $register_error = '';
 $register_success = '';
+$active_tab = 'login'; // Tab default: 'login' atau 'register'
 
+// 2. PROSES REGISTRASI (Jika Form Register Dikirim)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
-    $username     = mysqli_real_escape_string($koneksi, trim($_POST['reg_username']));
-    $nama_lengkap = mysqli_real_escape_string($koneksi, trim($_POST['reg_nama']));
-    $password     = $_POST['reg_password'];
-    $role         = 'user'; 
+    $active_tab = 'register';
+    $nama_lengkap = trim($_POST['nama_lengkap'] ?? '');
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    $role = (isset($_POST['role']) && in_array($_POST['role'], ['admin', 'user'])) ? $_POST['role'] : 'user';
 
-    $check_user = mysqli_query($koneksi, "SELECT id_user FROM users WHERE username = '$username'");
-    if (mysqli_num_rows($check_user) > 0) {
-        $register_error = "Username sudah digunakan!";
+    if (empty($nama_lengkap) || empty($username) || empty($password) || empty($confirm_password)) {
+        $register_error = "Semua kolom wajib diisi!";
+    } elseif (strlen($username) < 3) {
+        $register_error = "Username minimal harus 3 karakter!";
+    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $register_error = "Username hanya boleh huruf, angka, dan underscore (_)!";
+    } elseif (strlen($password) < 4) {
+        $register_error = "Password minimal harus 4 karakter!";
+    } elseif ($password !== $confirm_password) {
+        $register_error = "Konfirmasi password tidak sesuai!";
     } else {
-        $query_reg = "INSERT INTO users (username, password, nama_lengkap, role) VALUES ('$username', '$password', '$nama_lengkap', '$role')";
-        if (mysqli_query($koneksi, $query_reg)) {
-            $register_success = "Akun berhasil dibuat! Silakan Sign In.";
+        // Cek duplikasi username
+        $stmt_check = mysqli_prepare($koneksi, "SELECT id_user FROM users WHERE username = ?");
+        mysqli_stmt_bind_param($stmt_check, "s", $username);
+        mysqli_stmt_execute($stmt_check);
+        mysqli_stmt_store_result($stmt_check);
+
+        if (mysqli_stmt_num_rows($stmt_check) > 0) {
+            $register_error = "Username '<strong>" . htmlspecialchars($username) . "</strong>' sudah terdaftar. Silakan pilih username lain.";
+            mysqli_stmt_close($stmt_check);
         } else {
-            $register_error = "Gagal mendaftar, coba lagi.";
+            mysqli_stmt_close($stmt_check);
+
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $stmt_insert = mysqli_prepare($koneksi, "INSERT INTO users (nama_lengkap, username, password, role) VALUES (?, ?, ?, ?)");
+            mysqli_stmt_bind_param($stmt_insert, "ssss", $nama_lengkap, $username, $hashed_password, $role);
+
+            if (mysqli_stmt_execute($stmt_insert)) {
+                $register_success = "Pendaftaran akun berhasil! Silakan masuk menggunakan username dan password Anda.";
+                $active_tab = 'login';
+            } else {
+                $register_error = "Terjadi kesalahan saat mendaftar: " . mysqli_error($koneksi);
+            }
+            mysqli_stmt_close($stmt_insert);
         }
     }
 }
 
-// ------------------------------------------------------------------
-// 4. CABANG 1: FORM SIGN IN & REGISTER
-// ------------------------------------------------------------------
+// 3. PROSES LOGIN (Jika Form Login Dikirim)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+    $active_tab = 'login';
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if (empty($username) || empty($password)) {
+        $login_error = "Username dan password wajib diisi!";
+    } else {
+        $stmt_login = mysqli_prepare($koneksi, "SELECT * FROM users WHERE username = ?");
+        mysqli_stmt_bind_param($stmt_login, "s", $username);
+        mysqli_stmt_execute($stmt_login);
+        $result = mysqli_stmt_get_result($stmt_login);
+
+        if ($result && mysqli_num_rows($result) > 0) {
+            $user = mysqli_fetch_assoc($result);
+
+            // Verifikasi password (password_verify hash atau plain fallback)
+            if (password_verify($password, $user['password']) || $password === $user['password']) {
+                $_SESSION['id_user']  = $user['id_user'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['nama']     = $user['nama_lengkap'] ?? $user['username'];
+                $_SESSION['role']     = $user['role']; // 'admin' atau 'user'
+
+                header("Location: index.php");
+                exit();
+            } else {
+                $login_error = "Password yang Anda masukkan salah!";
+            }
+        } else {
+            $login_error = "Username tidak ditemukan dalam sistem!";
+        }
+        mysqli_stmt_close($stmt_login);
+    }
+}
+
+// 4. CABANG 1: FORM LOGIN & REGISTER (Jika Belum Login)
 if (!isset($_SESSION['role'])) :
-    $active_tab = isset($_POST['register']) || !empty($register_error) ? 'signup' : 'login';
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In / Register - Aplikasi Kantin</title>
-    <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .login-body { background-color: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .login-card { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 380px; }
-        
-        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
-        .tab-btn { flex: 1; padding: 10px; background: none; border: none; font-size: 0.95rem; font-weight: bold; color: #64748b; cursor: pointer; transition: all 0.2s; }
-        .tab-btn.active { color: #2563eb; border-bottom: 2px solid #2563eb; margin-bottom: -2px; }
-        .auth-form { display: none; }
-        .auth-form.active { display: block; }
-        
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #475569; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
-        .btn-login { width: 100%; background: #2563eb; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-login:hover { background: #1d4ed8; }
-        .btn-signup { background-color: #16a34a; }
-        .btn-signup:hover { background-color: #15803d; }
-        
-        .alert { padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem; }
-        .alert-danger { background: #fee2e2; color: #991b1b; }
-        .alert-success { background: #dcfce7; color: #166534; }
-    </style>
+    <title>Login & Registrasi - Aplikasi Kantin Sekolah</title>
+    <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
 </head>
 <body class="login-body">
-    <div class="login-card">
-        
-        <div class="auth-tabs">
-            <button class="tab-btn <?= $active_tab === 'login' ? 'active' : ''; ?>" id="btn-login" onclick="switchTab('login')">Sign In</button>
-            <button class="tab-btn <?= $active_tab === 'signup' ? 'active' : ''; ?>" id="btn-signup" onclick="switchTab('signup')">Register</button>
+    <div class="auth-container">
+        <!-- Header / Logo Brand -->
+        <div class="auth-header">
+            <div class="auth-logo">🍔</div>
+            <h2>Kantin Sekolah</h2>
+            <p class="auth-subtitle">Sistem Manajemen & Pemesanan Kantin</p>
         </div>
 
-        <!-- FORM SIGN IN -->
-        <div id="login-form" class="auth-form <?= $active_tab === 'login' ? 'active' : ''; ?>">
-            <h2 style="text-align: center; margin-bottom: 15px; color: #1e293b;">Sign In Kantin</h2>
-            <?php if (!empty($login_error)): ?>
-                <div class="alert alert-danger"><?= htmlspecialchars($login_error); ?></div>
-            <?php endif; ?>
+        <div class="login-card">
+            <!-- Navigasi Tab Login vs Register -->
+            <div class="auth-tabs">
+                <button type="button" class="tab-btn <?= ($active_tab === 'login') ? 'active' : ''; ?>" id="tab-login-btn" onclick="switchAuthTab('login')">
+                    Masuk
+                </button>
+                <button type="button" class="tab-btn <?= ($active_tab === 'register') ? 'active' : ''; ?>" id="tab-register-btn" onclick="switchAuthTab('register')">
+                    Daftar Akun
+                </button>
+            </div>
+
+            <!-- Pesan Alert / Feedback -->
             <?php if (!empty($register_success)): ?>
-                <div class="alert alert-success"><?= htmlspecialchars($register_success); ?></div>
+                <div class="alert alert-success">
+                    <span class="alert-icon">✓</span>
+                    <div><?= $register_success; ?></div>
+                </div>
             <?php endif; ?>
-            
-            <form method="POST">
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" name="username" required autocomplete="off">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" required>
-                </div>
-                <button type="submit" name="login" class="btn-login">Sign In</button>
-            </form>
-        </div>
 
-        <!-- FORM REGISTER -->
-        <div id="signup-form" class="auth-form <?= $active_tab === 'signup' ? 'active' : ''; ?>">
-            <h2 style="text-align: center; margin-bottom: 15px; color: #1e293b;">Register Akun Baru</h2>
+            <?php if (!empty($login_error)): ?>
+                <div class="alert alert-danger" id="login-alert">
+                    <span class="alert-icon">⚠️</span>
+                    <div><?= $login_error; ?></div>
+                </div>
+            <?php endif; ?>
+
             <?php if (!empty($register_error)): ?>
-                <div class="alert alert-danger"><?= htmlspecialchars($register_error); ?></div>
+                <div class="alert alert-danger" id="register-alert">
+                    <span class="alert-icon">⚠️</span>
+                    <div><?= $register_error; ?></div>
+                </div>
             <?php endif; ?>
-            
-            <form method="POST">
-                <div class="form-group">
-                    <label>Nama Lengkap</label>
-                    <input type="text" name="reg_nama" placeholder="Contoh: Budi Santoso" required autocomplete="off">
-                </div>
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" name="reg_username" placeholder="Buat username" required autocomplete="off">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="reg_password" placeholder="Buat password" required>
-                </div>
-                <button type="submit" name="register" class="btn-login btn-signup">Daftar Akun</button>
-            </form>
-        </div>
 
+            <!-- PANEL 1: FORM LOGIN -->
+            <div class="auth-panel <?= ($active_tab === 'login') ? 'active' : ''; ?>" id="login-panel">
+                <form method="POST" action="">
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">👤</span>
+                            <input type="text" id="login-username" name="username" placeholder="Masukkan username" required autocomplete="username" value="<?= isset($_POST['login']) ? htmlspecialchars($_POST['username'] ?? '') : ''; ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="login-password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
+                            <button type="button" class="btn-toggle-pwd" onclick="togglePassword('login-password', this)" title="Tampilkan/Sembunyikan Password">👁️</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" name="login" class="btn-primary">
+                        Masuk ke Akun
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <span>Belum punya akun?</span>
+                    <a href="javascript:void(0)" onclick="switchAuthTab('register')" class="auth-link">Daftar sekarang</a>
+                </div>
+            </div>
+
+            <!-- PANEL 2: FORM REGISTRASI -->
+            <div class="auth-panel <?= ($active_tab === 'register') ? 'active' : ''; ?>" id="register-panel">
+                <form method="POST" action="">
+                    <div class="form-group">
+                        <label for="reg-nama">Nama Lengkap</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📝</span>
+                            <input type="text" id="reg-nama" name="nama_lengkap" placeholder="Contoh: Budi Santoso" required autocomplete="name" value="<?= isset($_POST['register']) ? htmlspecialchars($_POST['nama_lengkap'] ?? '') : ''; ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-username">Username</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">👤</span>
+                            <input type="text" id="reg-username" name="username" placeholder="Huruf / angka, contoh: budi123" required autocomplete="username" value="<?= isset($_POST['register']) ? htmlspecialchars($_POST['username'] ?? '') : ''; ?>">
+                        </div>
+                        <small class="form-hint">Gunakan huruf, angka, atau underscore (_) tanpa spasi.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="reg-password" name="password" placeholder="Minimal 4 karakter" required autocomplete="new-password">
+                            <button type="button" class="btn-toggle-pwd" onclick="togglePassword('reg-password', this)" title="Tampilkan/Sembunyikan Password">👁️</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-confirm">Konfirmasi Password</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔐</span>
+                            <input type="password" id="reg-confirm" name="confirm_password" placeholder="Ulangi password Anda" required autocomplete="new-password">
+                            <button type="button" class="btn-toggle-pwd" onclick="togglePassword('reg-confirm', this)" title="Tampilkan/Sembunyikan Password">👁️</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" name="register" class="btn-primary btn-success-action">
+                        Daftar Sekarang
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <span>Sudah memiliki akun?</span>
+                    <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="auth-link">Masuk di sini</a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script>
-        function switchTab(tabName) {
-            document.querySelectorAll('.auth-form').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            if (tabName === 'login') {
-                document.getElementById('login-form').classList.add('active');
-                document.getElementById('btn-login').classList.add('active');
-            } else {
-                document.getElementById('signup-form').classList.add('active');
-                document.getElementById('btn-signup').classList.add('active');
-            }
-        }
-    </script>
+    <script src="assets/script.js?v=<?= time(); ?>"></script>
 </body>
 </html>
 
 <?php
-// ------------------------------------------------------------------
-// 5. CABANG 2: DASHBOARD ADMIN
-// ------------------------------------------------------------------
+// 5. CABANG 2: DASHBOARD ADMIN (Jika Role = 'admin')
 elseif ($_SESSION['role'] === 'admin') :
 
+    // 1) Statistik transaksi
     $q_stat_transaksi = mysqli_query($koneksi, "SELECT COUNT(*) AS total_tx, COALESCE(SUM(total_bayar), 0) AS total_pendapatan FROM transaksi");
     $stat_tx = mysqli_fetch_assoc($q_stat_transaksi);
     $total_transaksi = (int)($stat_tx['total_tx'] ?? 0);
     $total_pendapatan = (float)($stat_tx['total_pendapatan'] ?? 0);
 
+    // 2) Statistik menu
     $q_stat_menu = mysqli_query($koneksi, "SELECT COUNT(*) AS total_menu, SUM(CASE WHEN stok < 5 THEN 1 ELSE 0 END) AS stok_sedikit FROM menu");
     $stat_menu = mysqli_fetch_assoc($q_stat_menu);
     $total_menu = (int)($stat_menu['total_menu'] ?? 0);
     $stok_sedikit = (int)($stat_menu['stok_sedikit'] ?? 0);
 
+    // 3) Ambil data menu
     $q_menu = mysqli_query($koneksi, "SELECT * FROM menu ORDER BY id_menu DESC");
     $data_menu = [];
-    while ($row = mysqli_fetch_assoc($q_menu)) { $data_menu[] = $row; }
+    while ($row = mysqli_fetch_assoc($q_menu)) {
+        $data_menu[] = $row;
+    }
 
+    // 4) Ambil transaksi terakhir
     $query_tx = "
         SELECT t.id_transaksi, t.kode_transaksi, t.nama_pembeli, t.tanggal_transaksi, t.total_bayar,
                GROUP_CONCAT(CONCAT(m.nama_menu, ' (x', dt.jumlah, ')') SEPARATOR ', ') AS item_dibeli
@@ -214,7 +303,9 @@ elseif ($_SESSION['role'] === 'admin') :
     ";
     $q_tx = mysqli_query($koneksi, $query_tx);
     $data_transaksi = [];
-    while ($row = mysqli_fetch_assoc($q_tx)) { $data_transaksi[] = $row; }
+    while ($row = mysqli_fetch_assoc($q_tx)) {
+        $data_transaksi[] = $row;
+    }
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -222,50 +313,20 @@ elseif ($_SESSION['role'] === 'admin') :
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Kantin</title>
-    <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .admin-body { background-color: #f1f5f9; color: #334155; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .header h1 { font-size: 1.8rem; color: #1e293b; }
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-add { background-color: #2563eb; color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-weight: 500; }
-        .btn-add:hover { background-color: #1d4ed8; }
-        .btn-logout { background-color: #ef4444; color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-weight: 500; }
-        .btn-logout:hover { background-color: #dc2626; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #2563eb; }
-        .stat-card.green { border-left-color: #16a34a; }
-        .stat-card.orange { border-left-color: #f97316; }
-        .stat-card.purple { border-left-color: #9333ea; }
-        .stat-card h3 { font-size: 0.85rem; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-card p { font-size: 1.5rem; font-weight: bold; color: #0f172a; }
-
-        .section-title { font-size: 1.2rem; margin-bottom: 12px; color: #1e293b; }
-        .table-container { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; margin-bottom: 30px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-        th { background-color: #f8fafc; color: #475569; padding: 12px 16px; border-bottom: 2px solid #e2e8f0; font-weight: 600; }
-        td { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-        tr:hover { background-color: #f8fafc; }
-        .img-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; }
-        .badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600; }
-        .badge-kat { background: #e0f2fe; color: #0369a1; }
-        .badge-stok { background: #fef3c7; color: #d97706; }
-        .btn-action { text-decoration: none; font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; margin-right: 3px; display: inline-block; }
-        .btn-edit { background-color: #f59e0b; color: white; }
-        .btn-delete { background-color: #ef4444; color: white; }
-    </style>
+    <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
 </head>
-<body class="admin-body">
+<body>
 
     <div class="header">
         <h1>Dashboard Admin Kantin</h1>
         <div class="header-actions">
             <a href="menu/tambah.php" class="btn-add">+ Tambah Menu Baru</a>
-            <a href="?action=logout" class="btn-logout">Sign Out (<?= htmlspecialchars($_SESSION['nama']); ?>)</a>
+            <a href="transaksi/index.php" class="btn-add" style="background-color:#16a34a;">riwayat Transaksi</a>
+            <a href="?action=logout" class="btn-logout">Logout (<?= htmlspecialchars($_SESSION['nama']); ?>)</a>
         </div>
     </div>
 
+    <!-- Ringkasan Statistik -->
     <div class="stats-grid">
         <div class="stat-card green">
             <h3>Total Pendapatan</h3>
@@ -285,6 +346,7 @@ elseif ($_SESSION['role'] === 'admin') :
         </div>
     </div>
 
+    <!-- Tabel Kelola Menu -->
     <h2 class="section-title">Daftar Menu Kantin</h2>
     <div class="table-container">
         <table>
@@ -299,33 +361,42 @@ elseif ($_SESSION['role'] === 'admin') :
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($data_menu)): foreach ($data_menu as $menu): ?>
-                    <tr>
-                        <td><img src="../uploads/<?= htmlspecialchars($menu['foto']); ?>" alt="Foto" class="img-thumb" onerror="this.src='https://via.placeholder.com/45'"></td>
-                        <td><strong><?= htmlspecialchars($menu['nama_menu']); ?></strong></td>
-                        <td><span class="badge badge-kat"><?= htmlspecialchars($menu['kategori']); ?></span></td>
-                        <td>Rp <?= number_format($menu['harga'], 0, ',', '.'); ?></td>
-                        <td>
-                            <?= $menu['stok']; ?>
-                            <?php if ($menu['stok'] < 5): ?>
-                                <span class="badge badge-stok">Sedikit</span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <a href="edit_menu.php?id=<?= $menu['id_menu']; ?>" class="btn-action btn-edit">Edit</a>
-                            <a href="hapus_menu.php?id=<?= $menu['id_menu']; ?>" class="btn-action btn-delete" onclick="return confirm('Yakin ingin menghapus menu ini?')">Hapus</a>
-                        </td>
-                    </tr>
-                <?php endforeach; else: ?>
+                <?php if (!empty($data_menu)): ?>
+                    <?php foreach ($data_menu as $menu): ?>
+                        <tr>
+                            <td>
+                                <?php if (!empty($menu['foto'])): ?>
+                                    <img src="menu/uploads/<?= htmlspecialchars($menu['foto']); ?>" alt="Foto" class="img-thumb" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'45\' height=\'45\' viewBox=\'0 0 45 45\'%3E%3Crect width=\'45\' height=\'45\' fill=\'%23e2e8f0\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'20\'%3E🍽️%3C/text%3E%3C/svg%3E';">
+                                <?php else: ?>
+                                    <div style="width: 45px; height: 45px; background: #e2e8f0; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem;">🍽️</div>
+                                <?php endif; ?>
+                            </td>
+                            <td><strong><?= htmlspecialchars($menu['nama_menu'] ?? $menu['nama_produk'] ?? ''); ?></strong></td>
+                            <td><span class="badge badge-kat"><?= htmlspecialchars($menu['kategori'] ?? ''); ?></span></td>
+                            <td>Rp <?= number_format($menu['harga'] ?? 0, 0, ',', '.'); ?></td>
+                            <td>
+                                <?= $menu['stok'] ?? 0; ?>
+                                <?php if (($menu['stok'] ?? 0) < 5): ?>
+                                    <span class="badge badge-stok">Sedikit</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <a href="menu/edit.php?id_menu=<?= $menu['id_menu']; ?>" class="btn-action btn-edit">Edit</a>
+                                <a href="menu/hapus.php?id_menu=<?= $menu['id_menu']; ?>" class="btn-action btn-delete" onclick="return confirm('Yakin ingin menghapus menu ini?')">Hapus</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
                     <tr><td colspan="6" style="text-align:center;">Belum ada data menu di database.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 
+    <!-- Tabel Transaksi Terakhir -->
     <h2 class="section-title">10 Transaksi Terakhir</h2>
     <div class="table-container">
-        <table>
+        <table> 
             <thead>
                 <tr>
                     <th>Kode TX</th>
@@ -336,15 +407,17 @@ elseif ($_SESSION['role'] === 'admin') :
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($data_transaksi)): foreach ($data_transaksi as $tx): ?>
-                    <tr>
-                        <td><strong><?= htmlspecialchars($tx['kode_transaksi']); ?></strong></td>
-                        <td><?= htmlspecialchars($tx['nama_pembeli']); ?></td>
-                        <td><?= htmlspecialchars($tx['item_dibeli'] ?? 'Tidak ada item'); ?></td>
-                        <td><?= date('d/m/Y H:i', strtotime($tx['tanggal_transaksi'])); ?></td>
-                        <td><strong>Rp <?= number_format($tx['total_bayar'], 0, ',', '.'); ?></strong></td>
-                    </tr>
-                <?php endforeach; else: ?>
+                <?php if (!empty($data_transaksi)): ?>
+                    <?php foreach ($data_transaksi as $tx): ?>
+                        <tr>
+                            <td><strong><?= htmlspecialchars($tx['kode_transaksi']); ?></strong></td>
+                            <td><?= htmlspecialchars($tx['nama_pembeli']); ?></td>
+                            <td><?= htmlspecialchars($tx['item_dibeli'] ?? 'Tidak ada item'); ?></td>
+                            <td><?= date('d/m/Y H:i', strtotime($tx['tanggal_transaksi'])); ?></td>
+                            <td><strong>Rp <?= number_format($tx['total_bayar'], 0, ',', '.'); ?></strong></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
                     <tr><td colspan="5" style="text-align:center;">Belum ada data transaksi di database.</td></tr>
                 <?php endif; ?>
             </tbody>
@@ -355,67 +428,376 @@ elseif ($_SESSION['role'] === 'admin') :
 </html>
 
 <?php
-// ------------------------------------------------------------------
-// 6. CABANG 3: KATALOG PEMBELI (USER)
-// ------------------------------------------------------------------
+// 6. CABANG 3: KATALOG PEMBELI & FLOATING CART (Jika Role = 'user')
 else :
 
+    // Query menu yang stoknya masih ada
     $q_menu_user = mysqli_query($koneksi, "SELECT * FROM menu WHERE stok > 0 ORDER BY nama_menu ASC");
     $data_menu_user = [];
-    while ($row = mysqli_fetch_assoc($q_menu_user)) { $data_menu_user[] = $row; }
+    if ($q_menu_user) {
+        while ($row = mysqli_fetch_assoc($q_menu_user)) {
+            $data_menu_user[] = $row;
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Menu - Kantin</title>
+    <title>Katalog Menu - Kantin Sekolah</title>
+    <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .user-body { background-color: #f8fafc; color: #334155; padding: 20px; }
-        .user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .user-header h1 { font-size: 1.4rem; color: #1e293b; }
-        .btn-logout { background-color: #ef4444; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; }
-        .btn-logout:hover { background-color: #dc2626; }
-        
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .menu-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
-        .menu-card img { width: 100%; height: 150px; object-fit: cover; }
-        .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .badge-kat { background: #e0f2fe; color: #0369a1; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600; }
-        .menu-title { font-size: 1.1rem; font-weight: bold; color: #0f172a; margin-top: 5px; margin-bottom: 5px; }
-        .menu-price { font-size: 1rem; color: #16a34a; font-weight: bold; margin-bottom: 10px; }
-        .btn-buy { background-color: #2563eb; color: #fff; text-decoration: none; text-align: center; padding: 8px; border-radius: 6px; font-weight: 500; display: block; margin-top: 10px; }
-        .btn-buy:hover { background-color: #1d4ed8; }
+        /* CSS Tambahan untuk Floating Cart & Modal Drawer */
+        .catalog-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Tombol Ikon Keranjang Mengambang (Floating Button) */
+        .floating-cart-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #16a34a;
+            color: white;
+            border: none;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.6rem;
+            z-index: 999;
+            transition: transform 0.2s ease, background-color 0.2s;
+        }
+        .floating-cart-btn:hover {
+            transform: scale(1.1);
+            background-color: #15803d;
+        }
+
+        /* Badge Angka di Ikon */
+        .cart-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #dc2626;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 50px;
+            border: 2px solid white;
+        }
+
+        /* Overlay Gelap di Belakang Pop-up */
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .cart-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Kotak Pop-up / Drawer Keranjang (Awalnya tersembunyi di kanan) */
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 100%;
+            max-width: 380px;
+            height: 100%;
+            background: white;
+            z-index: 1001;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-drawer.open {
+            right: 0;
+        }
+
+        /* Header dalam Drawer Keranjang */
+        .cart-drawer-header {
+            padding: 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-drawer-header h3 {
+            font-size: 1.1rem;
+            color: #1e293b;
+            margin: 0;
+        }
+        .close-drawer-btn {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .close-drawer-btn:hover {
+            color: #000;
+        }
+
+        /* Daftar Item di dalam Drawer */
+        .cart-drawer-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .cart-item-row .item-info {
+            font-size: 0.9rem;
+        }
+        .cart-item-row .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cart-item-row button {
+            padding: 2px 8px;
+            background: #e2e8f0;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        /* Footer / Bagian Bawah Drawer (Total & Checkout) */
+        .cart-drawer-footer {
+            padding: 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+        .summary-flex {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: #1e293b;
+        }
+        .btn-checkout-main {
+            width: 100%;
+            background-color: #16a34a;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        .btn-checkout-main:hover {
+            background-color: #15803d;
+        }
     </style>
 </head>
-<body class="user-body">
+<body>
 
-    <div class="user-header">
-        <h1>Selamat Datang, <?= htmlspecialchars($_SESSION['nama']); ?>! 👋</h1>
-        <a href="?action=logout" class="btn-logout">Sign Out</a>
+    <div class="header">
+        <div>
+            <h1>Selamat Datang, <?= htmlspecialchars($_SESSION['nama']); ?>! 👋</h1>
+            <p style="color: #64748b; font-size: 0.9rem; margin-top: 4px;">Akun Pembeli / Siswa</p>
+        </div>
+        <a href="?action=logout" class="btn-logout">Logout</a>
     </div>
 
-    <h2 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 15px;">Daftar Menu Makanan & Minuman</h2>
+    <!-- Katalog Menu Utama (Full Lebar) -->
+    <div class="catalog-container">
+        <h2 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 15px;">Daftar Menu Makanan & Minuman Tersedia</h2>
 
-    <div class="menu-grid">
-        <?php if (!empty($data_menu_user)): foreach ($data_menu_user as $item): ?>
-            <div class="menu-card">
-                <img src="../uploads/<?= htmlspecialchars($item['foto']); ?>" alt="Foto Menu" onerror="this.src='https://via.placeholder.com/220x150'">
-                <div class="card-body">
-                    <div>
-                        <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
-                        <div class="menu-title"><?= htmlspecialchars($item['nama_menu']); ?></div>
-                        <div class="menu-price">Rp <?= number_format($item['harga'], 0, ',', '.'); ?></div>
+        <div class="menu-grid">
+            <?php if (!empty($data_menu_user)): ?>
+                <?php foreach ($data_menu_user as $item): ?>
+                    <div class="menu-card">
+                        <?php if (!empty($item['foto'])): ?>
+                            <img src="menu/uploads/<?= htmlspecialchars($item['foto']); ?>" alt="Foto Menu" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'220\' height=\'150\' viewBox=\'0 0 220 150\'%3E%3Crect width=\'220\' height=\'150\' fill=\'%23e2e8f0\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'40\'%3E🍽️%3C/text%3E%3C/svg%3E';">
+                        <?php else: ?>
+                            <div style="height: 150px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🍽️</div>
+                        <?php endif; ?>
+                        <div class="card-body">
+                            <div>
+                                <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
+                                <div class="menu-title"><?= htmlspecialchars($item['nama_menu'] ?? $item['nama_produk'] ?? ''); ?></div>
+                                <div class="menu-price">Rp <?= number_format($item['harga'], 0, ',', '.'); ?></div>
+                                <small style="color: #64748b;">Sisa stok: <strong><?= $item['stok']; ?></strong></small>
+                            </div>
+                            <button type="button" class="btn-buy" onclick="addToCart(<?= $item['id_menu']; ?>, '<?= htmlspecialchars(addslashes($item['nama_menu'] ?? '')); ?>', <?= $item['harga']; ?>, <?= $item['stok']; ?>)">
+                                + Tambah ke Keranjang
+                            </button>
+                        </div>
                     </div>
-                    <a href="order.php?id=<?= $item['id_menu']; ?>" class="btn-buy">+ Pesan Sekarang</a>
-                </div>
-            </div>
-        <?php endforeach; else: ?>
-            <p style="grid-column: 1 / -1; text-align: center; color: #64748b;">Belum ada menu yang tersedia saat ini.</p>
-        <?php endif; ?>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px; background: #fff; border-radius: 8px;">
+                    Belum ada menu yang tersedia saat ini.
+                </p>
+            <?php endif; ?>
+        </div>
     </div>
 
+    <!-- Tombol Ikon Keranjang Mengambang di Pojok Kanan Bawah -->
+    <button type="button" class="floating-cart-btn" onclick="toggleCartDrawer()" title="Buka Keranjang">
+        🛒
+        <span class="cart-badge" id="cart-counter">0</span>
+    </button>
+
+    <!-- Overlay Gelap -->
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCartDrawer()"></div>
+
+    <!-- Kotak Pop-up / Drawer Keranjang Samping -->
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <h3>🛒 Keranjang Pesanan</h3>
+            <button type="button" class="close-drawer-btn" onclick="toggleCartDrawer()">&times;</button>
+        </div>
+        
+        <div class="cart-drawer-body" id="cart-items-container">
+            <p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 40px 0;">Keranjang masih kosong</p>
+        </div>
+        
+        <div class="cart-drawer-footer">
+            <div class="summary-flex">
+                <span>Total:</span>
+                <strong id="cart-total" style="color: #16a34a;">Rp 0</strong>
+            </div>
+            <button type="button" class="btn-checkout-main" onclick="checkoutOrder()">
+                Proses Pesanan Sekarang
+            </button>
+        </div>
+    </div>
+
+    <!-- Script JavaScript Interaktif -->
+    <script>
+        let cart = [];
+
+        // Fungsi untuk membuka/menutup panel keranjang (Drawer)
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cartDrawer');
+            const overlay = document.getElementById('cartOverlay');
+            
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function addToCart(id, name, price, maxStock) {
+            const existingItem = cart.find(item => item.id === id);
+            
+            if (existingItem) {
+                if (existingItem.quantity < maxStock) {
+                    existingItem.quantity += 1;
+                } else {
+                    alert("Jumlah pesanan melebihi stok yang tersedia!");
+                    return;
+                }
+            } else {
+                cart.push({ id, name, price, quantity: 1, maxStock });
+            }
+            
+            updateCartUI();
+            
+            // Efek opsional: Otomatis buka keranjang saat pertama kali item dimasukkan (atau biarkan tertutup)
+            // toggleCartDrawer(); 
+        }
+
+        function updateQuantity(id, amount) {
+            const item = cart.find(item => item.id === id);
+            if (item) {
+                item.quantity += amount;
+                if (item.quantity > item.maxStock) {
+                    item.quantity = item.maxStock;
+                    alert("Jumlah pesanan mencapai batas stok!");
+                }
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            updateCartUI();
+        }
+
+        function calculateTotal() {
+            return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const totalElement = document.getElementById('cart-total');
+            const counterElement = document.getElementById('cart-counter');
+            
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 40px 0;">Keranjang masih kosong</p>';
+                totalElement.innerText = 'Rp 0';
+                counterElement.innerText = '0';
+                return;
+            }
+            
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            counterElement.innerText = totalItems;
+            
+            cart.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'cart-item-row';
+                row.innerHTML = `
+                    <div class="item-info">
+                        <strong>${item.name}</strong><br>
+                        <small style="color: #64748b;">Rp ${item.price.toLocaleString('id-ID')} x ${item.quantity}</small>
+                    </div>
+                    <div class="item-controls">
+                        <button type="button" onclick="updateQuantity(${item.id}, -1)">-</button>
+                        <span style="font-size: 0.9rem; min-width: 15px; text-align: center;">${item.quantity}</span>
+                        <button type="button" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+            
+            totalElement.innerText = `Rp ${calculateTotal().toLocaleString('id-ID')}`;
+        }
+
+        function checkoutOrder() {
+            if (cart.length === 0) {
+                alert("Keranjang belanja Anda masih kosong!");
+                return;
+            }
+            
+            const total = calculateTotal();
+            alert(`Pesanan berhasil dibuat!\nTotal pembayaran: Rp ${total.toLocaleString('id-ID')}`);
+            
+            cart = [];
+            updateCartUI();
+            toggleCartDrawer(); // Tutup keranjang setelah checkout
+        }
+    </script>
 </body>
 </html>
 
