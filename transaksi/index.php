@@ -24,7 +24,7 @@ if (!$hasil) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kantin Sekolah - Riwayat Transaksi</title>
-<<<<<<< HEAD
+
     
     <!-- CSS Internal (Soft Aesthetic Sage Green Theme) -->
     <style>
@@ -218,7 +218,7 @@ if (!$hasil) {
         }
     </style>
 </head>
-<body>
+<bo>
 
 <div class="sub-tagline">Fresh • Sehat • Enak • Bersahabat</div>
 
@@ -232,8 +232,7 @@ if (!$hasil) {
                 <p>Riwayat dan pemantauan transaksi kasir</p>
             </div>
             <div class="btn-group">
-                <a href="../menu/index.php" class="btn btn-light">Daftar Menu</a>
-                <a href="tambah.php" class="btn btn-warning">+ Transaksi Baru</a>
+                <a href="../index.php" class="btn btn-light">Kembali</a>
             </div>
         </div>
 
@@ -268,7 +267,7 @@ if (!$hasil) {
                                <td>
                 <div class="action-links">
                             <a href="detail.php?id=<?php echo $id_transaksi; ?>" class="btn btn-sm btn-info" title="Detail">Detail</a>
-                            <a href="detail.php?id=<?php echo $id_transaksi; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?');" title="Detail">Detail</a>
+                            <a href="detail.php?id=<?php echo $id_transaksi; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?');" title="Detail">Hapus</a>
                             </div>
                                 </td>
                             </td>
@@ -290,54 +289,3 @@ if (!$hasil) {
 
     </div>
 </div>
-=======
-    <link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-
-    <h1>Riwayat Transaksi Kantin</h1>
-    <?php require __DIR__ . '/../includes/nav_admin.php'; ?>
-
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Kode TX</th>
-                    <th>Nama Pembeli</th>
-                    <th>Detail Pesanan</th>
-                    <th>Tanggal</th>
-                    <th>Total Bayar</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php 
-                $no = 1;
-                while ($data = mysqli_fetch_assoc($hasil)) { 
-                ?>
-                <tr>
-                    <td><?= $no++; ?></td>
-                    <td><strong><?= htmlspecialchars($data['kode_transaksi']); ?></strong></td>
-                    <td><?= htmlspecialchars($data['nama_pembeli']); ?></td>
-                    <td><?= htmlspecialchars($data['item_dibeli'] ?? 'Tidak ada item'); ?></td>
-                    <td><?= date('d/m/Y H:i', strtotime($data['tanggal_transaksi'])); ?></td>
-                    <td><strong>Rp <?= number_format($data['total_bayar'], 0, ',', '.'); ?></strong></td>
-                    <td>
-                        <a href="detail.php?id=<?= $data['id_transaksi']; ?>" class="btn-action btn-edit" style="background-color: #2563eb;">Lihat Detail</a>
-                    </td>
-                </tr>
-                <?php } ?>
-
-                <?php if (mysqli_num_rows($hasil) == 0): ?>
-                <tr>
-                    <td colspan="7" style="text-align: center; font-style: italic;">Belum ada riwayat transaksi.</td>
-                </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
->>>>>>> d02f9db7f7d4d5040f2eaee7811e721579d1cb4e
-
-</body>
-</html>

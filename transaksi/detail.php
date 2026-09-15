@@ -49,8 +49,11 @@ if (!$info_transaksi && $id_transaksi > 0) {
 
     <h1>Rincian Nota Transaksi</h1>
     <?php require __DIR__ . '/../includes/nav_admin.php'; ?>
-
+    
     <?php if ($info_transaksi): ?>
+    <div class="btn-group">
+        <a href="../transaksi/index.php" class="btn btn-light">Kembali ke detail transaksi</a>
+    </div>
     <div class="table-container" style="max-width: 650px; padding: 20px; margin-top: 15px; margin-bottom: 20px;">
         <h2 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">Informasi Pembeli & Nota</h2>
         <table style="width: 100%; border: none;">
