@@ -620,6 +620,48 @@ else :
 </head>
 <body>
 
+<body>
+
+    <!-- Aksesoris sayuran lucu -->
+    <div class="veggie-decoration veggie-carrot">🍜</div>
+    <div class="veggie-decoration veggie-broccoli">🧋</div>
+    <div class="veggie-decoration veggie-tomato">☕</div>
+    <div class="veggie-decoration veggie-corn">🍟</div>
+
+    <!-- POP UP WELCOME -->
+<div class="welcome-popup" id="welcomePopup">
+    <div class="popup-card">
+
+        <button class="popup-close" onclick="closePopup()">×</button>
+
+        <div class="popup-icon">🍽️</div>
+
+        <h2>Selamat Datang! 🍚</h2>
+
+        <p>
+            Selamat datang di <b>Kantin Sehat</b>!
+            Yuk pilih makanan favoritmu dan tetap sehat
+        </p>
+
+        <button class="popup-button" onclick="closePopup()">
+            Yuk Jajan!
+        </button>
+
+    </div>
+</div>
+
+<script>
+     function closePopup() {
+    const popup = document.getElementById("welcomePopup");
+
+    popup.style.opacity = "0";
+
+    setTimeout(() => {
+        popup.style.display = "none";
+    }, 300);
+    }
+</script>
+
     <div class="header">
         <div>
             <h1>Selamat Datang, <?= htmlspecialchars($_SESSION['nama']); ?>! 👋</h1>

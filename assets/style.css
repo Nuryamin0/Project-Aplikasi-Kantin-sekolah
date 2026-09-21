@@ -11,15 +11,15 @@
 }
 
 body {
-    background-color: #f1f5f9;
-    color: #334155;
+    background-color: #ecfdf5;
+    color: #365447;
     padding: 20px;
     font-size: 16px;
     line-height: 1.5;
 }
 
 h1, h2, h3 {
-    color: #1e293b;
+    color: #173f2b;
 }
 
 a {
@@ -29,7 +29,7 @@ a {
 
 /* 2. Halaman Login & Registrasi */
 body.login-body {
-    background: linear-gradient(135deg, #eff6ff 0%, #f1f5f9 50%, #e2e8f0 100%);
+    background: linear-gradient(135deg, #ecfdf5 0%, #ecfdf5 50%, #d1fae5 100%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -56,13 +56,13 @@ body.login-body {
 .auth-header h2 {
     font-size: 1.6rem;
     font-weight: 700;
-    color: #0f172a;
+    color: #123524;
     letter-spacing: -0.5px;
 }
 
 .auth-subtitle {
     font-size: 0.88rem;
-    color: #64748b;
+    color: #648276;
     margin-top: 2px;
 }
 
@@ -71,13 +71,13 @@ body.login-body {
     padding: 28px;
     border-radius: 12px;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-    border: 1px solid #e2e8f0;
+    border: 1px solid #d1fae5;
 }
 
 /* Tab Navigasi Login / Register */
 .auth-tabs {
     display: flex;
-    background: #f1f5f9;
+    background: #ecfdf5;
     padding: 4px;
     border-radius: 8px;
     margin-bottom: 22px;
@@ -92,19 +92,19 @@ body.login-body {
     border-radius: 6px;
     font-size: 0.92rem;
     font-weight: 600;
-    color: #64748b;
+    color: #648276;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
 }
 
 .tab-btn:hover {
-    color: #1e293b;
+    color: #173f2b;
 }
 
 .tab-btn.active {
     background: #ffffff;
-    color: #2563eb;
+    color: #2e8b57;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
@@ -139,7 +139,7 @@ body.login-body {
     margin-bottom: 6px;
     font-size: 0.88rem;
     font-weight: 600;
-    color: #334155;
+    color: #365447;
 }
 
 .input-with-icon {
@@ -159,17 +159,17 @@ body.login-body {
 .input-with-icon input {
     width: 100%;
     padding: 10px 40px 10px 38px;
-    border: 1.5px solid #cbd5e1;
+    border: 1.5px solid #b7d8c6;
     border-radius: 8px;
     font-size: 0.92rem;
-    color: #1e293b;
+    color: #173f2b;
     outline: none;
     transition: all 0.2s ease;
-    background-color: #f8fafc;
+    background-color: #f6fffa;
 }
 
 .input-with-icon input:focus {
-    border-color: #2563eb;
+    border-color: #2e8b57;
     background-color: #ffffff;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
@@ -194,7 +194,7 @@ body.login-body {
 .form-hint {
     display: block;
     font-size: 0.76rem;
-    color: #64748b;
+    color: #648276;
     margin-top: 4px;
 }
 
@@ -218,9 +218,9 @@ body.login-body {
     display: flex;
     flex-direction: column;
     padding: 10px 12px;
-    border: 1.5px solid #cbd5e1;
+    border: 1.5px solid #b7d8c6;
     border-radius: 8px;
-    background: #f8fafc;
+    background: #f6fffa;
     transition: all 0.2s ease;
     text-align: left;
     height: 100%;
@@ -229,29 +229,29 @@ body.login-body {
 .role-title {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #1e293b;
+    color: #173f2b;
 }
 
 .role-desc {
     font-size: 0.72rem;
-    color: #64748b;
+    color: #648276;
     margin-top: 2px;
 }
 
 .role-option input[type="radio"]:checked + .role-card {
-    border-color: #2563eb;
-    background: #eff6ff;
+    border-color: #2e8b57;
+    background: #ecfdf5;
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
 .role-option input[type="radio"]:checked + .role-card .role-title {
-    color: #1d4ed8;
+    color: #237447;
 }
 
 /* Buttons */
 .btn-primary {
     width: 100%;
-    background: #2563eb;
+    background: #2e8b57;
     color: #ffffff;
     border: none;
     padding: 11px 16px;
@@ -265,7 +265,7 @@ body.login-body {
 }
 
 .btn-primary:hover {
-    background: #1d4ed8;
+    background: #237447;
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
 }
@@ -275,12 +275,12 @@ body.login-body {
 }
 
 .btn-success-action {
-    background: #16a34a;
+    background: #22a06b;
     box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);
 }
 
 .btn-success-action:hover {
-    background: #15803d;
+    background: #188454;
     box-shadow: 0 4px 6px rgba(22, 163, 74, 0.25);
 }
 
@@ -303,15 +303,15 @@ body.login-body {
 }
 
 .alert-danger {
-    background: #fef2f2;
-    color: #991b1b;
+    background: #fff5f5;
+    color: #b42318;
     border: 1px solid #fecaca;
 }
 
 .alert-success {
-    background: #f0fdf4;
-    color: #166534;
-    border: 1px solid #bbf7d0;
+    background: #ecfdf5;
+    color: #176b45;
+    border: 1px solid #b7ebce;
 }
 
 /* Footer Link Tab */
@@ -319,20 +319,20 @@ body.login-body {
     text-align: center;
     margin-top: 18px;
     padding-top: 14px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid #ecfdf5;
     font-size: 0.86rem;
-    color: #64748b;
+    color: #648276;
 }
 
 .auth-link {
-    color: #2563eb;
+    color: #2e8b57;
     font-weight: 600;
     margin-left: 4px;
     transition: color 0.2s;
 }
 
 .auth-link:hover {
-    color: #1d4ed8;
+    color: #237447;
     text-decoration: underline;
 }
 
@@ -346,12 +346,12 @@ body.login-body {
     padding: 16px 22px;
     border-radius: 10px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e2e8f0;
+    border: 1px solid #d1fae5;
 }
 
 .header h1 {
     font-size: 1.4rem;
-    color: #0f172a;
+    color: #123524;
     font-weight: 700;
 }
 
@@ -362,7 +362,7 @@ body.login-body {
 }
 
 .btn-add {
-    background-color: #2563eb;
+    background-color: #2e8b57;
     color: #ffffff;
     padding: 8px 14px;
     border-radius: 6px;
@@ -375,11 +375,11 @@ body.login-body {
 }
 
 .btn-add:hover {
-    background-color: #1d4ed8;
+    background-color: #237447;
 }
 
 .btn-logout {
-    background-color: #ef4444;
+    background-color: #dc5b5b;
     color: #ffffff;
     padding: 8px 14px;
     border-radius: 6px;
@@ -389,7 +389,7 @@ body.login-body {
 }
 
 .btn-logout:hover {
-    background-color: #dc2626;
+    background-color: #c94747;
 }
 
 .btn-keranjang {
@@ -408,11 +408,11 @@ body.login-body {
     padding: 12px 16px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    border: 1px solid #e2e8f0;
+    border: 1px solid #d1fae5;
 }
 
 .navigasi a {
-    color: #2563eb;
+    color: #2e8b57;
     margin-right: 20px;
     font-weight: 600;
     font-size: 0.92rem;
@@ -420,13 +420,13 @@ body.login-body {
 }
 
 .navigasi a:hover {
-    color: #1d4ed8;
+    color: #237447;
 }
 
 .navigasi a.aktif {
-    color: #0f172a;
+    color: #123524;
     cursor: default;
-    border-bottom: 2px solid #0f172a;
+    border-bottom: 2px solid #123524;
     padding-bottom: 3px;
 }
 
@@ -443,8 +443,8 @@ body.login-body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    border: 1px solid #e2e8f0;
-    border-left: 4px solid #2563eb;
+    border: 1px solid #d1fae5;
+    border-left: 4px solid #2e8b57;
     transition: transform 0.2s ease;
 }
 
@@ -453,20 +453,20 @@ body.login-body {
 }
 
 .stat-card.green {
-    border-left-color: #16a34a;
+    border-left-color: #22a06b;
 }
 
 .stat-card.orange {
-    border-left-color: #f97316;
+    border-left-color: #e6a23c;
 }
 
 .stat-card.purple {
-    border-left-color: #9333ea;
+    border-left-color: #8b5cf6;
 }
 
 .stat-card h3 {
     font-size: 0.82rem;
-    color: #64748b;
+    color: #648276;
     text-transform: uppercase;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -476,7 +476,7 @@ body.login-body {
 .stat-card p {
     font-size: 1.45rem;
     font-weight: 700;
-    color: #0f172a;
+    color: #123524;
 }
 
 /* 5. Tabel & Container */
@@ -484,14 +484,14 @@ body.login-body {
     font-size: 1.15rem;
     font-weight: 700;
     margin-bottom: 12px;
-    color: #0f172a;
+    color: #123524;
 }
 
 .table-container {
     background: #ffffff;
     border-radius: 10px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    border: 1px solid #e2e8f0;
+    border: 1px solid #d1fae5;
     overflow-x: auto;
     margin-bottom: 30px;
 }
@@ -505,10 +505,10 @@ table {
 }
 
 th {
-    background-color: #f8fafc;
+    background-color: #f6fffa;
     color: #475569;
     padding: 12px 16px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #d1fae5;
     font-weight: 600;
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -517,12 +517,12 @@ th {
 
 td {
     padding: 12px 16px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #ecfdf5;
     vertical-align: middle;
 }
 
 tr:hover td {
-    background-color: #f8fafc;
+    background-color: #f6fffa;
 }
 
 .img-thumb {
@@ -530,7 +530,7 @@ tr:hover td {
     height: 44px;
     object-fit: cover;
     border-radius: 6px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #d1fae5;
 }
 
 /* Badges */
@@ -542,8 +542,8 @@ tr:hover td {
 }
 
 .badge-kat {
-    background: #e0f2fe;
-    color: #0369a1;
+    background: #e0f7ec;
+    color: #167a52;
     font-size: 0.75rem;
     padding: 3px 8px;
     border-radius: 12px;
@@ -552,8 +552,8 @@ tr:hover td {
 }
 
 .badge-stok {
-    background: #fef3c7;
-    color: #d97706;
+    background: #fff4cc;
+    color: #b7791f;
 }
 
 /* Tombol Aksi */
@@ -572,17 +572,17 @@ tr:hover td {
 }
 
 .btn-edit {
-    background-color: #f59e0b;
+    background-color: #e6a23c;
     color: white;
 }
 
 .btn-delete, .btn-hapus {
-    background-color: #ef4444;
+    background-color: #dc5b5b;
     color: white;
 }
 
 .btn-tambah {
-    background-color: #16a34a;
+    background-color: #22a06b;
     color: white;
     padding: 8px 14px;
     border-radius: 6px;
@@ -594,7 +594,7 @@ tr:hover td {
 }
 
 .btn-tambah:hover {
-    background-color: #15803d;
+    background-color: #188454;
 }
 
 /* 6. Grid Katalog Menu (Tampilan Pembeli / User) */
@@ -609,7 +609,7 @@ tr:hover td {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e2e8f0;
+    border: 1px solid #d1fae5;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -625,7 +625,7 @@ tr:hover td {
     width: 100%;
     height: 150px;
     object-fit: cover;
-    background-color: #f1f5f9;
+    background-color: #ecfdf5;
 }
 
 .card-body {
@@ -639,19 +639,19 @@ tr:hover td {
 .menu-title {
     font-size: 1.05rem;
     font-weight: 700;
-    color: #0f172a;
+    color: #123524;
     margin: 6px 0 4px 0;
 }
 
 .menu-price {
     font-size: 1.05rem;
-    color: #16a34a;
+    color: #22a06b;
     font-weight: 700;
     margin-bottom: 6px;
 }
 
 .btn-buy {
-    background-color: #2563eb;
+    background-color: #2e8b57;
     color: #ffffff;
     text-align: center;
     padding: 9px;
@@ -664,5 +664,345 @@ tr:hover td {
 }
 
 .btn-buy:hover {
-    background-color: #1d4ed8;
+    background-color: #237447;
+}
+
+/* ==========================================================================
+   HEALTHY GREEN THEME — Kantin Ceria
+   ========================================================================== */
+body {
+    background: linear-gradient(135deg, #f0fdf4 0%, #f7fff9 55%, #ecfdf5 100%);
+}
+body.login-body {
+    background:
+        radial-gradient(circle at 15% 20%, rgba(46,139,87,.12), transparent 28%),
+        radial-gradient(circle at 85% 80%, rgba(34,160,107,.10), transparent 30%),
+        linear-gradient(135deg, #effff5 0%, #f7fff9 50%, #e7f8ee 100%);
+}
+.login-card, .header, .navigasi, .stat-card, .table-container, .menu-card {
+    border-color: #d5eee0;
+    box-shadow: 0 8px 24px rgba(31, 91, 58, .07);
+}
+.login-card {
+    border-radius: 18px;
+}
+.auth-tabs {
+    background: #eaf8ef;
+    border-radius: 12px;
+}
+.tab-btn {
+    border-radius: 9px;
+}
+.tab-btn.active {
+    color: #237447;
+    box-shadow: 0 3px 10px rgba(31, 91, 58, .10);
+}
+.input-with-icon input:focus {
+    border-color: #2e8b57;
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, .14);
+}
+.role-card:hover {
+    border-color: #72b98e;
+    background: #f3fff7;
+}
+.role-option input[type="radio"]:checked + .role-card {
+    border-color: #2e8b57;
+    background: #ecfdf5;
+    box-shadow: 0 0 0 2px rgba(46, 139, 87, .13);
+}
+.btn-primary, .btn-add, .btn-buy {
+    background: linear-gradient(135deg, #2e8b57, #22a06b);
+    box-shadow: 0 5px 12px rgba(46, 139, 87, .18);
+}
+.btn-primary:hover, .btn-add:hover, .btn-buy:hover {
+    background: linear-gradient(135deg, #237447, #188454);
+    box-shadow: 0 7px 16px rgba(46, 139, 87, .23);
+}
+.btn-success-action, .btn-tambah {
+    background: linear-gradient(135deg, #22a06b, #2e8b57);
+}
+.header {
+    border-radius: 14px;
+}
+.navigasi {
+    border-radius: 12px;
+}
+.navigasi a {
+    color: #237447;
+}
+.navigasi a:hover, .auth-link:hover {
+    color: #188454;
+}
+.navigasi a.aktif {
+    color: #173f2b;
+    border-bottom-color: #2e8b57;
+}
+.stat-card {
+    border-left-color: #2e8b57;
+}
+.stat-card.green {
+    border-left-color: #22a06b;
+}
+.stat-card.orange {
+    border-left-color: #e6a23c;
+}
+.stat-card.purple {
+    border-left-color: #8b5cf6;
+}
+th {
+    background: #effaf3;
+    color: #365447;
+    border-bottom-color: #d1eadb;
+}
+tr:hover td {
+    background: #f4fff7;
+}
+.menu-card {
+    border-radius: 16px;
+}
+.menu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 28px rgba(31, 91, 58, .12);
+}
+.menu-card img {
+    background: #edf9f1;
+}
+.menu-price {
+    color: #188454;
+}
+.badge-kat {
+    background: #e2f7eb;
+    color: #167a52;
+}
+.badge-stok {
+    background: #fff4cc;
+    color: #9a6a13;
+}
+
+/* ==========================================
+   🥕 AKSESORIS SAYUR LUCU
+   ========================================== */
+
+.veggie-decoration {
+    position: fixed;
+    font-size: 2.2rem;
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+    animation: veggieFloat 4s ease-in-out infinite;
+}
+
+/* Posisi masing-masing sayuran */
+.veggie-carrot {
+    top: 90px;
+    left: 25px;
+    transform: rotate(-15deg);
+}
+
+.veggie-broccoli {
+    top: 160px;
+    right: 25px;
+    animation-delay: 1s;
+}
+
+.veggie-tomato {
+    bottom: 35px;
+    left: 30px;
+    animation-delay: 2s;
+}
+
+.veggie-corn {
+    bottom: 80px;
+    right: 35px;
+    animation-delay: 1.5s;
+}
+
+@keyframes veggieFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(5deg);
+    }
+}
+
+/* Supaya tetap rapi di HP */
+@media (max-width: 600px) {
+    .veggie-decoration {
+        font-size: 1.6rem;
+        opacity: 0.75;
+    }
+
+    .veggie-carrot {
+        left: 8px;
+    }
+
+    .veggie-broccoli {
+        right: 8px;
+    }
+
+    .veggie-tomato {
+        left: 10px;
+    }
+
+    .veggie-corn {
+        right: 10px;
+    }
+}
+
+/* =========================
+   WELCOME POPUP
+========================= */
+
+.welcome-popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 60, 35, 0.55);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 9999;
+
+    backdrop-filter: blur(6px);
+
+    animation: popupBg 0.4s ease;
+}
+
+.popup-card {
+    position: relative;
+
+    width: min(90%, 420px);
+
+    background: #ffffff;
+    border-radius: 25px;
+
+    padding: 35px 30px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+
+    animation: popupOpen 0.5s ease;
+}
+
+/* ICON */
+
+.popup-icon {
+    width: 80px;
+    height: 80px;
+
+    margin: 0 auto 15px;
+
+    background: #e8f8df;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 45px;
+
+    animation: floating 2s ease-in-out infinite;
+}
+
+.popup-card h2 {
+    color: #2f7d32;
+    font-size: 27px;
+    margin-bottom: 10px;
+}
+
+.popup-card p {
+    color: #667466;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+/* BUTTON */
+
+.popup-button {
+    border: none;
+
+    background: #62b45a;
+    color: white;
+
+    padding: 13px 25px;
+
+    border-radius: 50px;
+
+    font-size: 15px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.popup-button:hover {
+    background: #4d9d4b;
+    transform: translateY(-3px);
+
+    box-shadow: 0 8px 18px rgba(76, 160, 72, 0.3);
+}
+
+/* CLOSE */
+
+.popup-close {
+    position: absolute;
+
+    top: 15px;
+    right: 18px;
+
+    border: none;
+    background: transparent;
+
+    font-size: 27px;
+
+    color: #8b9b8c;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.popup-close:hover {
+    color: #e85d5d;
+    transform: rotate(90deg);
+}
+
+/* ANIMATION */
+
+@keyframes popupOpen {
+    from {
+        opacity: 0;
+        transform: scale(0.7) translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes popupBg {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes floating {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
 }
