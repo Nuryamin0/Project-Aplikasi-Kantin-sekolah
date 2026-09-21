@@ -81,6 +81,7 @@ if (!$info_transaksi && $id_transaksi > 0) {
                     <th>Harga Satuan</th>
                     <th>Jumlah</th>
                     <th>Subtotal</th>
+                    <th>Catatan</th>
                 </tr>
             </thead>
             <tbody>
@@ -96,12 +97,13 @@ if (!$info_transaksi && $id_transaksi > 0) {
                     <td>Rp <?= number_format($item['harga'], 0, ',', '.'); ?></td>
                     <td><?= $item['jumlah']; ?>x</td>
                     <td>Rp <?= number_format($item['subtotal'], 0, ',', '.'); ?></td>
+                    <td><?= !empty($item['catatan']) ? htmlspecialchars($item['catatan']) : '-'; ?></td>
                 </tr>
                 <?php endforeach; ?>
 
                 <?php if (empty($items)): ?>
                 <tr>
-                    <td colspan="5" style="text-align: center; font-style: italic;">Tidak ada rincian item.</td>
+                    <td colspan="6" style="text-align: center; font-style: italic;">Tidak ada rincian item.</td>
                 </tr>
                 <?php endif; ?>
             </tbody>
@@ -111,6 +113,7 @@ if (!$info_transaksi && $id_transaksi > 0) {
                     <td style="font-weight: bold; color: #16a34a; font-size: 1.05rem; padding: 14px 16px;">
                         Rp <?= number_format($info_transaksi['total_bayar'] ?? $grand_total, 0, ',', '.'); ?>
                     </td>
+                    <td style="padding: 14px 16px;"></td>
                 </tr>
             </tfoot>
         </table>

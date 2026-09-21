@@ -33,6 +33,12 @@ if ($total_user == 0) {
     }
 }
 
+// Auto-migration: Pastikan kolom 'catatan' ada di tabel `detail_transaksi`
+$cek_kolom_dt = mysqli_query($koneksi, "SHOW COLUMNS FROM detail_transaksi LIKE 'catatan'");
+if ($cek_kolom_dt && mysqli_num_rows($cek_kolom_dt) === 0) {
+    @mysqli_query($koneksi, "ALTER TABLE detail_transaksi ADD COLUMN catatan TEXT NULL AFTER subtotal");
+}
+
 // 1. PROSES LOGOUT
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     session_destroy();
@@ -286,14 +292,23 @@ elseif ($_SESSION['role'] === 'admin') :
     // 3) Ambil data menu
     $q_menu = mysqli_query($koneksi, "SELECT * FROM menu ORDER BY id_menu DESC");
     $data_menu = [];
-    while ($row = mysqli_fetch_assoc($q_menu)) {
-        $data_menu[] = $row;
+    if ($q_menu) {
+        while ($row = mysqli_fetch_assoc($q_menu)) {
+            $data_menu[] = $row;
+        }
     }
 
     // 4) Ambil transaksi terakhir
+    $cek_dt_catatan = mysqli_query($koneksi, "SHOW COLUMNS FROM detail_transaksi LIKE 'catatan'");
+    $has_catatan_col = ($cek_dt_catatan && mysqli_num_rows($cek_dt_catatan) > 0);
+    $catatan_expr = $has_catatan_col
+        ? "GROUP_CONCAT(CASE WHEN dt.catatan IS NULL OR dt.catatan = '' THEN NULL ELSE CONCAT(m.nama_menu, ': ', dt.catatan) END SEPARATOR ', ') AS catatan_pesanan"
+        : "NULL AS catatan_pesanan";
+
     $query_tx = "
         SELECT t.id_transaksi, t.kode_transaksi, t.nama_pembeli, t.tanggal_transaksi, t.total_bayar,
-               GROUP_CONCAT(CONCAT(m.nama_menu, ' (x', dt.jumlah, ')') SEPARATOR ', ') AS item_dibeli
+               GROUP_CONCAT(CONCAT(m.nama_menu, ' (x', dt.jumlah, ')') SEPARATOR ', ') AS item_dibeli,
+               $catatan_expr
         FROM transaksi t
         LEFT JOIN detail_transaksi dt ON t.id_transaksi = dt.id_transaksi
         LEFT JOIN menu m ON dt.id_menu = m.id_menu
@@ -303,8 +318,10 @@ elseif ($_SESSION['role'] === 'admin') :
     ";
     $q_tx = mysqli_query($koneksi, $query_tx);
     $data_transaksi = [];
-    while ($row = mysqli_fetch_assoc($q_tx)) {
-        $data_transaksi[] = $row;
+    if ($q_tx) {
+        while ($row = mysqli_fetch_assoc($q_tx)) {
+            $data_transaksi[] = $row;
+        }
     }
 ?>
 <!DOCTYPE html>
@@ -404,6 +421,7 @@ elseif ($_SESSION['role'] === 'admin') :
                     <th>Detail Pesanan</th>
                     <th>Tanggal</th>
                     <th>Total Bayar</th>
+                    <th>Catatan</th>
                 </tr>
             </thead>
             <tbody>
@@ -415,10 +433,11 @@ elseif ($_SESSION['role'] === 'admin') :
                             <td><?= htmlspecialchars($tx['item_dibeli'] ?? 'Tidak ada item'); ?></td>
                             <td><?= date('d/m/Y H:i', strtotime($tx['tanggal_transaksi'])); ?></td>
                             <td><strong>Rp <?= number_format($tx['total_bayar'], 0, ',', '.'); ?></strong></td>
+                            <td><?= !empty($tx['catatan_pesanan']) ? htmlspecialchars($tx['catatan_pesanan']) : '-'; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="5" style="text-align:center;">Belum ada data transaksi di database.</td></tr>
+                    <tr><td colspan="6" style="text-align:center;">Belum ada data transaksi di database.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -452,34 +471,60 @@ else :
         try {
             // 1. Simpan ke tabel transaksi 
             $stmt_tx = mysqli_prepare($koneksi, "INSERT INTO transaksi (kode_transaksi, nama_pembeli, tanggal_transaksi, total_bayar) VALUES (?, ?, ?, ?)");
-            mysqli_stmt_bind_param($stmt_tx, "sssd", $kode_transaksi,$nama_pembeli, $tanggal_transaksi,$total_bayar);
+            if (!$stmt_tx) {
+                throw new Exception("Gagal menyiapkan data transaksi: " . mysqli_error($koneksi));
+            }
+            mysqli_stmt_bind_param($stmt_tx, "sssd", $kode_transaksi, $nama_pembeli, $tanggal_transaksi, $total_bayar);
             mysqli_stmt_execute($stmt_tx);
             $id_transaksi = mysqli_insert_id($koneksi);
             mysqli_stmt_close($stmt_tx);
 
-            // 2. Simpan detail transaksi (termasuk catatan/request jika kolom tabel detail_transaksi sudah ada)
-            // Catatan: Pastikan tabel detail_transaksi Anda memiliki kolom 'catatan' atau 'keterangan'. Jika belum, Anda bisa menambahkannya di database.
-            foreach ($cart_items as $item) {$id_menu = $item['id'];$jumlah = $item['quantity'];$subtotal = $item['price'] *$jumlah;
-                $catatan =$item['note'] ?? '';
+            // 2. Simpan detail transaksi
+            // Cek apakah kolom catatan tersedia di tabel detail_transaksi
+            $cek_col = mysqli_query($koneksi, "SHOW COLUMNS FROM detail_transaksi LIKE 'catatan'");
+            $has_catatan_field = ($cek_col && mysqli_num_rows($cek_col) > 0);
 
-                // Query ini mengasumsikan tabel Anda memiliki kolom 'catatan'. 
-                // Jika tabel detail_transaksi belum ada kolom catatan, Anda bisa menambahkannya lewat phpMyAdmin (ALTER TABLE detail_transaksi ADD catatan TEXT;).
+            if ($has_catatan_field) {
                 $stmt_dt = mysqli_prepare($koneksi, "INSERT INTO detail_transaksi (id_transaksi, id_menu, jumlah, subtotal, catatan) VALUES (?, ?, ?, ?, ?)");
-                mysqli_stmt_bind_param($stmt_dt, "iiids", $id_transaksi, $id_menu,$jumlah, $subtotal,$catatan);
+            } else {
+                $stmt_dt = mysqli_prepare($koneksi, "INSERT INTO detail_transaksi (id_transaksi, id_menu, jumlah, subtotal) VALUES (?, ?, ?, ?)");
+            }
+
+            if (!$stmt_dt) {
+                throw new Exception("Gagal menyiapkan detail pesanan: " . mysqli_error($koneksi));
+            }
+
+            $stmt_stok = mysqli_prepare($koneksi, "UPDATE menu SET stok = stok - ? WHERE id_menu = ?");
+
+            foreach ($cart_items as $item) {
+                $id_menu = (int) $item['id'];
+                $jumlah = (int) $item['quantity'];
+                $subtotal = (float) ($item['price'] * $jumlah);
+                $catatan = trim($item['note'] ?? '');
+
+                if ($has_catatan_field) {
+                    mysqli_stmt_bind_param($stmt_dt, "iiids", $id_transaksi, $id_menu, $jumlah, $subtotal, $catatan);
+                } else {
+                    mysqli_stmt_bind_param($stmt_dt, "iiid", $id_transaksi, $id_menu, $jumlah, $subtotal);
+                }
                 mysqli_stmt_execute($stmt_dt);
-                mysqli_stmt_close($stmt_dt);
 
                 // Kurangi stok menu
-                $stmt_stok = mysqli_prepare($koneksi, "UPDATE menu SET stok = stok - ? WHERE id_menu = ?");
-                mysqli_stmt_bind_param($stmt_stok, "ii", $jumlah,$id_menu);
-                mysqli_stmt_execute($stmt_stok);
+                if ($stmt_stok) {
+                    mysqli_stmt_bind_param($stmt_stok, "ii", $jumlah, $id_menu);
+                    mysqli_stmt_execute($stmt_stok);
+                }
+            }
+
+            mysqli_stmt_close($stmt_dt);
+            if ($stmt_stok) {
                 mysqli_stmt_close($stmt_stok);
             }
 
             mysqli_commit($koneksi);
             echo "<script>alert('Pesanan berhasil dibuat atas nama " . htmlspecialchars($nama_pembeli) . "!'); window.location.href='" . $_SERVER['PHP_SELF'] . "';</script>";
             exit();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             mysqli_rollback($koneksi);
             echo "<script>alert('Gagal memproses pesanan: " . addslashes($e->getMessage()) . "'); window.location.href='" . $_SERVER['PHP_SELF'] . "';</script>";
             exit();

@@ -3,9 +3,23 @@ include "../config/koneksi.php";
 
 /** @var mysqli $koneksi */
 
+// Auto-migration jika kolom catatan belum ada
+$cek_catatan = mysqli_query($koneksi, "SHOW COLUMNS FROM detail_transaksi LIKE 'catatan'");
+$has_catatan = ($cek_catatan && mysqli_num_rows($cek_catatan) > 0);
+if (!$has_catatan) {
+    @mysqli_query($koneksi, "ALTER TABLE detail_transaksi ADD COLUMN catatan TEXT NULL AFTER subtotal");
+    $cek_catatan = mysqli_query($koneksi, "SHOW COLUMNS FROM detail_transaksi LIKE 'catatan'");
+    $has_catatan = ($cek_catatan && mysqli_num_rows($cek_catatan) > 0);
+}
+
+$catatan_expr = $has_catatan
+    ? "GROUP_CONCAT(CASE WHEN dt.catatan IS NULL OR dt.catatan = '' THEN NULL ELSE CONCAT(m.nama_menu, ': ', dt.catatan) END SEPARATOR ', ') AS catatan_pesanan"
+    : "NULL AS catatan_pesanan";
+
 $query = "
     SELECT t.id_transaksi, t.kode_transaksi, t.nama_pembeli, t.tanggal_transaksi, t.total_bayar,
-           GROUP_CONCAT(CONCAT(m.nama_menu, ' (x', dt.jumlah, ')') SEPARATOR ', ') AS item_dibeli
+           GROUP_CONCAT(CONCAT(m.nama_menu, ' (x', dt.jumlah, ')') SEPARATOR ', ') AS item_dibeli,
+           $catatan_expr
     FROM transaksi t
     LEFT JOIN detail_transaksi dt ON t.id_transaksi = dt.id_transaksi
     LEFT JOIN menu m ON dt.id_menu = m.id_menu
@@ -218,7 +232,7 @@ if (!$hasil) {
         }
     </style>
 </head>
-<bo>
+<body>
 
 <div class="sub-tagline">Fresh • Sehat • Enak • Bersahabat</div>
 
@@ -243,11 +257,12 @@ if (!$hasil) {
                     <thead>
                         <tr>
                             <th style="width: 5%; text-align: center;">No</th>
-                            <th style="width: 15%;">Kode</th>
-                            <th style="width: 25%;">Nama Pembeli</th>
-                            <th style="width: 20%;">Tanggal</th>
-                            <th style="width: 18%;">Total</th>
-                            <th style="width: 17%; text-align: center;">Aksi</th>
+                            <th style="width: 13%;">Kode</th>
+                            <th style="width: 18%;">Nama Pembeli</th>
+                            <th style="width: 16%;">Tanggal</th>
+                            <th style="width: 14%;">Total</th>
+                            <th style="width: 22%;">Catatan</th>
+                            <th style="width: 12%; text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -263,13 +278,11 @@ if (!$hasil) {
                             <td><strong><?php echo htmlspecialchars($data['nama_pembeli']); ?></strong></td>
                             <td style="color: #718096;"><?php echo htmlspecialchars($data['tanggal_transaksi']); ?></td>
                             <td class="total-price">Rp <?php echo number_format($data['total_bayar'], 0, ',', '.'); ?></td>
+                            <td><?php echo !empty($data['catatan_pesanan']) ? htmlspecialchars($data['catatan_pesanan']) : '-'; ?></td>
                             <td>
-                               <td>
-                <div class="action-links">
-                            <a href="detail.php?id=<?php echo $id_transaksi; ?>" class="btn btn-sm btn-info" title="Detail">Detail</a>
-                            <a href="detail.php?id=<?php echo $id_transaksi; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?');" title="Detail">Hapus</a>
-                            </div>
-                                </td>
+                                <div class="action-links">
+                                    <a href="detail.php?id=<?php echo $id_transaksi; ?>" class="btn btn-sm btn-info" title="Detail">Detail</a>
+                                </div>
                             </td>
                         </tr>
                         <?php 
@@ -277,7 +290,7 @@ if (!$hasil) {
                         } else { 
                         ?>
                         <tr>
-                            <td colspan="6" class="empty-state">
+                            <td colspan="7" class="empty-state">
                                 Belum ada data transaksi.
                             </td>
                         </tr>
@@ -289,3 +302,6 @@ if (!$hasil) {
 
     </div>
 </div>
+
+</body>
+</html>
