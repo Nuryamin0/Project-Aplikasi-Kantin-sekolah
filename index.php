@@ -428,16 +428,13 @@ elseif ($_SESSION['role'] === 'admin') :
 </html>
 
 <?php
-// 6. CABANG 3: KATALOG PEMBELI & CHECKOUT KE DATABASE (Jika Role = 'user')
+// 6. CABANG 3: KATALOG PEMBELI & CHECKOUT DENGAN CATATAN (Jika Role = 'user')
 else :
     // Proses jika form checkout dikirim
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_pesanan'])) {
-        $id_user = $_SESSION['id_user'];
-        $nama_pembeli = $_SESSION['nama'] ?? 'Siswa';
-        $kode_transaksi = 'TRX-' . time() . '-' . rand(100, 999);
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_pesanan'])) {$id_user = $_SESSION['id_user'];$nama_pembeli = $_SESSION['nama'] ?? 'Siswa';$kode_transaksi = 'TRX-' . time() . '-' . rand(100, 999);
         $tanggal_transaksi = date('Y-m-d H:i:s');
         
-        $items_json = $_POST['cart_data'] ?? '';
+        $items_json =$_POST['cart_data'] ?? '';
         $cart_items = json_decode($items_json, true);
 
         if (empty($cart_items)) {
@@ -447,33 +444,34 @@ else :
 
         // Hitung total bayar
         $total_bayar = 0;
-        foreach ($cart_items as $item) {
-            $total_bayar += ($item['price'] * $item['quantity']);
+        foreach ($cart_items as $item) {$total_bayar += ($item['price'] *$item['quantity']);
         }
 
         mysqli_begin_transaction($koneksi);
 
         try {
-            // 1. Simpan ke tabel transaksi (Pastikan nama kolom sesuai database Anda)
+            // 1. Simpan ke tabel transaksi 
             $stmt_tx = mysqli_prepare($koneksi, "INSERT INTO transaksi (kode_transaksi, nama_pembeli, tanggal_transaksi, total_bayar) VALUES (?, ?, ?, ?)");
-            mysqli_stmt_bind_param($stmt_tx, "sssd", $kode_transaksi, $nama_pembeli, $tanggal_transaksi, $total_bayar);
+            mysqli_stmt_bind_param($stmt_tx, "sssd", $kode_transaksi,$nama_pembeli, $tanggal_transaksi,$total_bayar);
             mysqli_stmt_execute($stmt_tx);
             $id_transaksi = mysqli_insert_id($koneksi);
             mysqli_stmt_close($stmt_tx);
 
-            // 2. Simpan detail transaksi & kurangi stok
-            foreach ($cart_items as $item) {
-                $id_menu = $item['id'];
-                $jumlah = $item['quantity'];
-                $subtotal = $item['price'] * $jumlah;
+            // 2. Simpan detail transaksi (termasuk catatan/request jika kolom tabel detail_transaksi sudah ada)
+            // Catatan: Pastikan tabel detail_transaksi Anda memiliki kolom 'catatan' atau 'keterangan'. Jika belum, Anda bisa menambahkannya di database.
+            foreach ($cart_items as $item) {$id_menu = $item['id'];$jumlah = $item['quantity'];$subtotal = $item['price'] *$jumlah;
+                $catatan =$item['note'] ?? '';
 
-                $stmt_dt = mysqli_prepare($koneksi, "INSERT INTO detail_transaksi (id_transaksi, id_menu, jumlah, subtotal) VALUES (?, ?, ?, ?)");
-                mysqli_stmt_bind_param($stmt_dt, "iiid", $id_transaksi, $id_menu, $jumlah, $subtotal);
+                // Query ini mengasumsikan tabel Anda memiliki kolom 'catatan'. 
+                // Jika tabel detail_transaksi belum ada kolom catatan, Anda bisa menambahkannya lewat phpMyAdmin (ALTER TABLE detail_transaksi ADD catatan TEXT;).
+                $stmt_dt = mysqli_prepare($koneksi, "INSERT INTO detail_transaksi (id_transaksi, id_menu, jumlah, subtotal, catatan) VALUES (?, ?, ?, ?, ?)");
+                mysqli_stmt_bind_param($stmt_dt, "iiids", $id_transaksi, $id_menu,$jumlah, $subtotal,$catatan);
                 mysqli_stmt_execute($stmt_dt);
                 mysqli_stmt_close($stmt_dt);
 
+                // Kurangi stok menu
                 $stmt_stok = mysqli_prepare($koneksi, "UPDATE menu SET stok = stok - ? WHERE id_menu = ?");
-                mysqli_stmt_bind_param($stmt_stok, "ii", $jumlah, $id_menu);
+                mysqli_stmt_bind_param($stmt_stok, "ii", $jumlah,$id_menu);
                 mysqli_stmt_execute($stmt_stok);
                 mysqli_stmt_close($stmt_stok);
             }
@@ -493,7 +491,7 @@ else :
     $data_menu_user = [];
     if ($q_menu_user) {
         while ($row = mysqli_fetch_assoc($q_menu_user)) {
-            $data_menu_user[] = $row;
+            $data_menu_user[] =$row;
         }
     }
 ?>
@@ -523,15 +521,17 @@ else :
         }
         .cart-overlay.show { display: block; opacity: 1; }
         .cart-drawer {
-            position: fixed; top: 0; right: -400px; width: 100%; max-width: 380px; height: 100%;
+            position: fixed; top: 0; right: -420px; width: 100%; max-width: 400px; height: 100%;
             background: white; z-index: 1001; box-shadow: -5px 0 25px rgba(0,0,0,0.15);
             transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;
         }
         .cart-drawer.open { right: 0; }
         .cart-drawer-header { padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
         .cart-drawer-body { padding: 20px; flex: 1; overflow-y: auto; }
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .cart-item-row { padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .cart-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .cart-item-row button { padding: 2px 8px; background: #e2e8f0; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        .input-note { width: 100%; padding: 6px 8px; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 6px; }
         .cart-drawer-footer { padding: 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
         .summary-flex { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.1rem; color: #1e293b; }
         .btn-checkout-main { width: 100%; background-color: #16a34a; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
@@ -554,7 +554,7 @@ else :
 
         <div class="menu-grid">
             <?php if (!empty($data_menu_user)): ?>
-                <?php foreach ($data_menu_user as $item): ?>
+                <?php foreach ($data_menu_user as$item): ?>
                     <div class="menu-card">
                         <img src="menu/uploads/<?= htmlspecialchars($item['foto'] ?? ''); ?>" alt="Foto" onerror="this.src='https://via.placeholder.com/220x150'">
                         <div class="card-body">
@@ -564,7 +564,7 @@ else :
                                 <div class="menu-price">Rp <?= number_format($item['harga'], 0, ',', '.'); ?></div>
                                 <small style="color: #64748b;">Sisa stok: <strong><?= $item['stok']; ?></strong></small>
                             </div>
-                            <button type="button" class="btn-buy" onclick="addToCart(<?= $item['id_menu']; ?>, '<?= htmlspecialchars(addslashes($item['nama_menu'] ?? '')); ?>', <?= $item['harga']; ?>, <?= $item['stok']; ?>)">
+                            <button type="button" class="btn-buy" onclick="addToCart(<?= $item['id_menu']; ?>, '<?= htmlspecialchars(addslashes($item['nama_menu'] ?? '')); ?>', <?= $item['harga']; ?>, <?=$item['stok']; ?>)">
                                 + Tambah ke Keranjang
                             </button>
                         </div>
@@ -598,7 +598,7 @@ else :
             <input type="hidden" name="cart_data" id="cartDataInput">
 
             <div>
-                <!-- Informasi Nama Siswa yang otomatis masuk -->
+                <!-- Informasi Nama Siswa -->
                 <div style="background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
                     👤 Pemesan: <strong><?= htmlspecialchars($_SESSION['nama']); ?></strong>
                 </div>
@@ -613,7 +613,7 @@ else :
                     <span>Total:</span>
                     <strong id="cart-total" style="color: #16a34a;">Rp 0</strong>
                 </div>
-                <button type="submit" class="btn-checkout-main" id="checkoutBtn" disabled style="opacity: 0.6; cursor: not-allowed;">
+                <button type="submit" class="btn-checkout-main" id="checkoutBtn" disabled style="opacity: 0.6; cursor: not-allowed;" onclick="prepareCheckout()">
                     Proses Pesanan Sekarang
                 </button>
             </div>
@@ -638,7 +638,7 @@ else :
                     return;
                 }
             } else {
-                cart.push({ id, name, price, quantity: 1, maxStock });
+                cart.push({ id, name, price, quantity: 1, maxStock, note: '' });
             }
             updateCartUI();
         }
@@ -658,6 +658,14 @@ else :
             updateCartUI();
         }
 
+        // Fungsi memperbarui catatan/request per item menu di keranjang
+        function updateNote(id, value) {
+            const item = cart.find(item => item.id === id);
+            if (item) {
+                item.note = value;
+            }
+        }
+
         function calculateTotal() {
             return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
         }
@@ -666,7 +674,6 @@ else :
             const container = document.getElementById('cart-items-container');
             const totalElement = document.getElementById('cart-total');
             const counterElement = document.getElementById('cart-counter');
-            const cartDataInput = document.getElementById('cartDataInput');
             const checkoutBtn = document.getElementById('checkoutBtn');
             
             if (!container) return;
@@ -676,7 +683,6 @@ else :
                 container.innerHTML = '<p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 40px 0;">Keranjang masih kosong</p>';
                 totalElement.innerText = 'Rp 0';
                 counterElement.innerText = '0';
-                cartDataInput.value = '';
                 checkoutBtn.disabled = true;
                 checkoutBtn.style.opacity = '0.6';
                 checkoutBtn.style.cursor = 'not-allowed';
@@ -684,7 +690,6 @@ else :
             }
             
             counterElement.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartDataInput.value = JSON.stringify(cart);
             
             checkoutBtn.disabled = false;
             checkoutBtn.style.opacity = '1';
@@ -694,20 +699,30 @@ else :
                 const row = document.createElement('div');
                 row.className = 'cart-item-row';
                 row.innerHTML = `
-                    <div style="font-size: 0.9rem;">
-                        <strong>${item.name}</strong><br>
-                        <small style="color: #64748b;">Rp ${item.price.toLocaleString('id-ID')} x ${item.quantity}</small>
+                    <div class="cart-item-top">
+                        <div style="font-size: 0.9rem;">
+                            <strong>${item.name}</strong><br>
+                            <small style="color: #64748b;">Rp ${item.price.toLocaleString('id-ID')} x ${item.quantity}</small>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" onclick="updateQuantity(${item.id}, -1)">-</button>
+                            <span style="font-size: 0.9rem; min-width: 15px; text-align: center;">${item.quantity}</span>
+                            <button type="button" onclick="updateQuantity(${item.id}, 1)">+</button>
+                        </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <button type="button" onclick="updateQuantity(${item.id}, -1)">-</button>
-                        <span style="font-size: 0.9rem; min-width: 15px; text-align: center;">${item.quantity}</span>
-                        <button type="button" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    <div>
+                        <input type="text" class="input-note" placeholder="Catatan/request (contoh: jangan pakai pedas)" value="${item.note || ''}" oninput="updateNote(${item.id}, this.value)">
                     </div>
                 `;
                 container.appendChild(row);
             });
             
             totalElement.innerText = `Rp ${calculateTotal().toLocaleString('id-ID')}`;
+        }
+
+        // Masukkan data keranjang beserta catatan ke dalam input tersembunyi sebelum dikirim ke database
+        function prepareCheckout() {
+            document.getElementById('cartDataInput').value = JSON.stringify(cart);
         }
     </script>
 </body>
