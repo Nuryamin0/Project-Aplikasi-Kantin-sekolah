@@ -522,7 +522,8 @@ else :
             }
 
             mysqli_commit($koneksi);
-            echo "<script>alert('Pesanan berhasil dibuat atas nama " . htmlspecialchars($nama_pembeli) . "!'); window.location.href='" . $_SERVER['PHP_SELF'] . "';</script>";
+
+            header("Location: pesanan_berhasil.php");
             exit();
         } catch (Throwable $e) {
             mysqli_rollback($koneksi);
