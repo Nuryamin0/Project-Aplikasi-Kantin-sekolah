@@ -350,7 +350,7 @@ elseif ($_SESSION['role'] === 'admin') :
         <div class="header-actions">
             <a href="menu/tambah.php" class="btn-add">+ Tambah Menu Baru</a>
             <a href="transaksi/index.php" class="btn-add" style="background-color:#16a34a;">riwayat Transaksi</a>
-            <a href="?action=logout" class="btn-logout">Logout (<?= htmlspecialchars($_SESSION['nama']); ?>)</a>
+            <a href="#" class="btn-logout" onclick="openAdminLogout(event)">Logout (<?= htmlspecialchars($_SESSION['nama']); ?>)</a>
         </div>
     </div>
 
@@ -453,7 +453,30 @@ elseif ($_SESSION['role'] === 'admin') :
             </tbody>
         </table>
     </div>
+    
+    <!-- POP UP LOGOUT ADMIN -->
+<div id="adminLogoutPopup" class="admin-logout-popup">
+    <div class="admin-logout-box">
+        <h3>Logout?</h3>
+        <p>Yakin ingin keluar dari akun admin?</p>
 
+        <div class="admin-logout-buttons">
+            <button type="button" onclick="closeAdminLogout()">Batal</button>
+            <a href="?action=logout">Logout</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function openAdminLogout(event) {
+    event.preventDefault();
+    document.getElementById("adminLogoutPopup").classList.add("show");
+}
+
+function closeAdminLogout() {
+    document.getElementById("adminLogoutPopup").classList.remove("show");
+}
+</script>
 </body>
 </html>
 
@@ -647,7 +670,7 @@ else :
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
             <a href="pesanan_saya.php" class="btn-add" style="background-color:#2563eb;">📦 Pesanan Saya</a>
-            <a href="?action=logout" class="btn-logout">Logout</a>
+            <a href="#" class="btn-logout" onclick="showLogoutPopup(event)">Logout</a>
         </div>
     </div>
 
@@ -827,6 +850,51 @@ else :
             document.getElementById('cartDataInput').value = JSON.stringify(cart);
         }
     </script>
+
+    
+    <!-- POP UP LOGOUT -->
+<div class="logout-overlay" id="logoutPopup">
+    <div class="logout-popup-card">
+
+        <div class="logout-icon">👋</div>
+
+        <h2>Yakin ingin keluar?</h2>
+
+        <p>
+            Kamu akan keluar dari akun Kantin Sehat.
+        </p>
+
+        <div class="logout-buttons">
+            <button type="button" class="btn-cancel-logout" onclick="closeLogoutPopup()">
+                Batal
+            </button>
+
+            <a href="?action=logout" class="btn-confirm-logout">
+                Ya, Logout
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function showLogoutPopup(event) {
+    event.preventDefault();
+
+    document.getElementById('logoutPopup').classList.add('show');
+}
+
+function closeLogoutPopup() {
+    document.getElementById('logoutPopup').classList.remove('show');
+}
+
+// Klik area luar popup untuk menutup
+document.getElementById('logoutPopup').addEventListener('click', function(event) {
+    if (event.target === this) {
+        closeLogoutPopup();
+    }
+});
+</script>
 </body>
 </html>
 

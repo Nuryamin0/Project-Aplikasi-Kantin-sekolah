@@ -1236,3 +1236,163 @@ body.transaksi-page {
 .btn-confirm:hover {
     background-color: #c8e8cb;
 }
+
+.admin-logout-popup {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.admin-logout-popup.show {
+    display: flex;
+}
+
+.admin-logout-box {
+    background: white;
+    width: 300px;
+    padding: 22px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.admin-logout-box h3 {
+    margin: 0 0 8px;
+    color: #1e293b;
+}
+
+.admin-logout-box p {
+    margin-bottom: 18px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.admin-logout-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.admin-logout-buttons button,
+.admin-logout-buttons a {
+    flex: 1;
+    padding: 9px;
+    border-radius: 6px;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.admin-logout-buttons button {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.admin-logout-buttons a {
+    background: #dc2626;
+    color: white;
+}
+
+/* POP UP LOGOUT */
+.logout-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.logout-overlay.show {
+    display: flex;
+}
+
+.logout-popup-card {
+    width: 100%;
+    max-width: 380px;
+    background: white;
+    border-radius: 18px;
+    padding: 30px 25px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    animation: logoutPopup 0.25s ease;
+}
+
+.logout-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 15px;
+    background: #dcfce7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.logout-popup-card h2 {
+    margin: 0 0 8px;
+    color: #1e293b;
+    font-size: 1.3rem;
+}
+
+.logout-popup-card p {
+    margin: 0 0 25px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.logout-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.logout-buttons button,
+.logout-buttons a {
+    flex: 1;
+    padding: 11px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.btn-cancel-logout {
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+}
+
+.btn-cancel-logout:hover {
+    background: #e2e8f0;
+}
+
+.btn-confirm-logout {
+    background: #dc2626;
+    color: white;
+    border: none;
+}
+
+.btn-confirm-logout:hover {
+    background: #b91c1c;
+}
+
+@keyframes logoutPopup {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
