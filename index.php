@@ -39,6 +39,17 @@ if ($cek_kolom_dt && mysqli_num_rows($cek_kolom_dt) === 0) {
     @mysqli_query($koneksi, "ALTER TABLE detail_transaksi ADD COLUMN catatan TEXT NULL AFTER subtotal");
 }
 
+// Auto-migration: Pastikan kolom 'id_user' & 'status_konfirmasi' ada di tabel `transaksi`
+// (dipakai untuk menautkan pesanan ke akun & menandai apakah penjual sudah konfirmasi)
+$cek_kolom_idu = mysqli_query($koneksi, "SHOW COLUMNS FROM transaksi LIKE 'id_user'");
+if ($cek_kolom_idu && mysqli_num_rows($cek_kolom_idu) === 0) {
+    @mysqli_query($koneksi, "ALTER TABLE transaksi ADD COLUMN id_user INT NULL AFTER nama_pembeli");
+}
+$cek_kolom_status_tx = mysqli_query($koneksi, "SHOW COLUMNS FROM transaksi LIKE 'status_konfirmasi'");
+if ($cek_kolom_status_tx && mysqli_num_rows($cek_kolom_status_tx) === 0) {
+    @mysqli_query($koneksi, "ALTER TABLE transaksi ADD COLUMN status_konfirmasi ENUM('menunggu','dikonfirmasi') NOT NULL DEFAULT 'menunggu' AFTER total_bayar");
+}
+
 // 1. PROSES LOGOUT
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     session_destroy();
@@ -470,11 +481,11 @@ else :
 
         try {
             // 1. Simpan ke tabel transaksi 
-            $stmt_tx = mysqli_prepare($koneksi, "INSERT INTO transaksi (kode_transaksi, nama_pembeli, tanggal_transaksi, total_bayar) VALUES (?, ?, ?, ?)");
+            $stmt_tx = mysqli_prepare($koneksi, "INSERT INTO transaksi (kode_transaksi, nama_pembeli, id_user, tanggal_transaksi, total_bayar) VALUES (?, ?, ?, ?, ?)");
             if (!$stmt_tx) {
                 throw new Exception("Gagal menyiapkan data transaksi: " . mysqli_error($koneksi));
             }
-            mysqli_stmt_bind_param($stmt_tx, "sssd", $kode_transaksi, $nama_pembeli, $tanggal_transaksi, $total_bayar);
+            mysqli_stmt_bind_param($stmt_tx, "ssisd", $kode_transaksi, $nama_pembeli, $id_user, $tanggal_transaksi, $total_bayar);
             mysqli_stmt_execute($stmt_tx);
             $id_transaksi = mysqli_insert_id($koneksi);
             mysqli_stmt_close($stmt_tx);
@@ -522,7 +533,8 @@ else :
             }
 
             mysqli_commit($koneksi);
-            echo "<script>alert('Pesanan berhasil dibuat atas nama " . htmlspecialchars($nama_pembeli) . "!'); window.location.href='" . $_SERVER['PHP_SELF'] . "';</script>";
+
+            header("Location: pesanan_berhasil.php");
             exit();
         } catch (Throwable $e) {
             mysqli_rollback($koneksi);
@@ -633,7 +645,10 @@ else :
             <h1>Selamat Datang, <?= htmlspecialchars($_SESSION['nama']); ?>! 👋</h1>
             <p style="color: #64748b; font-size: 0.9rem; margin-top: 4px;">Akun Pembeli / Siswa</p>
         </div>
-        <a href="?action=logout" class="btn-logout">Logout</a>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="pesanan_saya.php" class="btn-add" style="background-color:#2563eb;">📦 Pesanan Saya</a>
+            <a href="?action=logout" class="btn-logout">Logout</a>
+        </div>
     </div>
 
     <div class="catalog-container">

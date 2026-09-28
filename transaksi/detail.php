@@ -7,7 +7,7 @@ $id_transaksi = (int) ($_GET['id'] ?? 0);
 
 $stmt = mysqli_prepare(
     $koneksi,
-    "SELECT d.*, t.kode_transaksi, t.nama_pembeli, t.tanggal_transaksi, t.total_bayar, m.nama_menu, m.harga
+    "SELECT d.*, t.kode_transaksi, t.nama_pembeli, t.tanggal_transaksi, t.total_bayar, t.status_konfirmasi, m.nama_menu, m.harga
      FROM detail_transaksi d
      INNER JOIN transaksi t ON d.id_transaksi = t.id_transaksi
      INNER JOIN menu m ON d.id_menu = m.id_menu
@@ -68,6 +68,16 @@ if (!$info_transaksi && $id_transaksi > 0) {
             <tr>
                 <td style="border: none; padding: 6px 0;"><strong>Waktu Transaksi</strong></td>
                 <td style="border: none; padding: 6px 0;">: <?= date('d/m/Y H:i:s', strtotime($info_transaksi['tanggal_transaksi'])); ?></td>
+            </tr>
+            <tr>
+                <td style="border: none; padding: 6px 0;"><strong>Status</strong></td>
+                <td style="border: none; padding: 6px 0;">:
+                    <?php if (($info_transaksi['status_konfirmasi'] ?? 'menunggu') === 'dikonfirmasi'): ?>
+                        <span class="badge-status badge-status-confirmed">✅ Dikonfirmasi</span>
+                    <?php else: ?>
+                        <span class="badge-status badge-status-pending">⏳ Menunggu Konfirmasi</span>
+                    <?php endif; ?>
+                </td>
             </tr>
         </table>
     </div>

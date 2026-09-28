@@ -1006,3 +1006,233 @@ tr:hover td {
         transform: translateY(-8px);
     }
 }
+
+/* ==========================================================================
+   7. Halaman Riwayat Transaksi (transaksi/index.php)
+   Theme: Soft Aesthetic Sage Green
+   ========================================================================== */
+body.transaksi-page {
+    background-color: #f4f6f4;
+    color: #4a5568;
+    padding: 40px 15px;
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+}
+
+/* Sub-header Aesthetic */
+.sub-tagline {
+    max-width: 950px;
+    margin: 0 auto 12px auto;
+    color: #789078;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 950px;
+    margin: 0 auto;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(107, 142, 108, 0.08);
+    overflow: hidden;
+    border: 1px solid #e2e8e2;
+}
+
+/* Header Gradasi Hijau Sage yang Lembut */
+.card-header {
+    background: linear-gradient(135deg, #87a08b 0%, #6b8e6e 100%);
+    color: #ffffff;
+    padding: 28px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.card-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+    color: #ffffff;
+}
+
+.card-header p {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    font-weight: 400;
+    color: #ffffff;
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-light {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    backdrop-filter: blur(4px);
+}
+
+.btn-light:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+.btn-warning {
+    background-color: #f3dfc1;
+    color: #6b5335;
+}
+
+.btn-warning:hover {
+    background-color: #ebd3b0;
+}
+
+.card .card-body {
+    padding: 28px;
+    display: block;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.card table,
+.transaksi-page table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.card th,
+.transaksi-page th {
+    background-color: #fafbfa;
+    color: #839284;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 14px 18px;
+    border-bottom: 2px solid #edf0ed;
+}
+
+.card td,
+.transaksi-page td {
+    padding: 18px;
+    border-bottom: 1px solid #f2f4f2;
+    font-size: 0.9rem;
+    color: #4a5568;
+}
+
+.card tr,
+.transaksi-page tr {
+    transition: background-color 0.2s ease;
+}
+
+.card tr:hover,
+.card tr:hover td,
+.transaksi-page tr:hover td {
+    background-color: #f7f9f7;
+}
+
+.badge-code {
+    background-color: #eaf1eb;
+    color: #4a6b4e;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.825rem;
+    display: inline-block;
+}
+
+.total-price {
+    font-weight: 700;
+    color: #557558;
+}
+
+.action-links {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.775rem;
+    border-radius: 8px;
+}
+
+.btn-info {
+    background-color: #e3edf7;
+    color: #4a6984;
+}
+.btn-info:hover {
+    background-color: #d4e3f3;
+}
+
+.card .btn-edit {
+    background-color: #f7eee3;
+    color: #84694a;
+}
+.card .btn-edit:hover {
+    background-color: #f2e3d0;
+}
+
+.card .btn-danger {
+    background-color: #f9e8e8;
+    color: #9c5252;
+}
+.card .btn-danger:hover {
+    background-color: #f4d6d6;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: #a0aec0;
+}
+
+/* Badge status konfirmasi pesanan (dipakai di transaksi/index.php & pesanan_saya.php) */
+.badge-status {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.775rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-status-pending {
+    background-color: #f3dfc1;
+    color: #6b5335;
+}
+
+.badge-status-confirmed {
+    background-color: #dcf1de;
+    color: #2f6b34;
+}
+
+.btn-confirm {
+    background-color: #dcf1de;
+    color: #2f6b34;
+}
+.btn-confirm:hover {
+    background-color: #c8e8cb;
+}

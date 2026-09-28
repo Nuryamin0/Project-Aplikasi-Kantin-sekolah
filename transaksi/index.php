@@ -12,18 +12,35 @@ if (!$has_catatan) {
     $has_catatan = ($cek_catatan && mysqli_num_rows($cek_catatan) > 0);
 }
 
+// Auto-migration jika kolom status_konfirmasi belum ada
+$cek_status_tx = mysqli_query($koneksi, "SHOW COLUMNS FROM transaksi LIKE 'status_konfirmasi'");
+if ($cek_status_tx && mysqli_num_rows($cek_status_tx) === 0) {
+    @mysqli_query($koneksi, "ALTER TABLE transaksi ADD COLUMN status_konfirmasi ENUM('menunggu','dikonfirmasi') NOT NULL DEFAULT 'menunggu' AFTER total_bayar");
+}
+
+// Proses konfirmasi pesanan oleh penjual/admin
+if (isset($_GET['konfirmasi'])) {
+    $id_konfirmasi = (int) $_GET['konfirmasi'];
+    $stmt_konf = mysqli_prepare($koneksi, "UPDATE transaksi SET status_konfirmasi = 'dikonfirmasi' WHERE id_transaksi = ?");
+    mysqli_stmt_bind_param($stmt_konf, "i", $id_konfirmasi);
+    mysqli_stmt_execute($stmt_konf);
+    mysqli_stmt_close($stmt_konf);
+    header("Location: index.php");
+    exit();
+}
+
 $catatan_expr = $has_catatan
     ? "GROUP_CONCAT(CASE WHEN dt.catatan IS NULL OR dt.catatan = '' THEN NULL ELSE CONCAT(m.nama_menu, ': ', dt.catatan) END SEPARATOR ', ') AS catatan_pesanan"
     : "NULL AS catatan_pesanan";
 
 $query = "
-    SELECT t.id_transaksi, t.kode_transaksi, t.nama_pembeli, t.tanggal_transaksi, t.total_bayar,
+    SELECT t.id_transaksi, t.kode_transaksi, t.nama_pembeli, t.tanggal_transaksi, t.total_bayar, t.status_konfirmasi,
            GROUP_CONCAT(CONCAT(m.nama_menu, ' (x', dt.jumlah, ')') SEPARATOR ', ') AS item_dibeli,
            $catatan_expr
     FROM transaksi t
     LEFT JOIN detail_transaksi dt ON t.id_transaksi = dt.id_transaksi
     LEFT JOIN menu m ON dt.id_menu = m.id_menu
-    GROUP BY t.id_transaksi, t.kode_transaksi, t.nama_pembeli, t.tanggal_transaksi, t.total_bayar
+    GROUP BY t.id_transaksi, t.kode_transaksi, t.nama_pembeli, t.tanggal_transaksi, t.total_bayar, t.status_konfirmasi
     ORDER BY t.tanggal_transaksi DESC
 ";
 $hasil = mysqli_query($koneksi, $query);
@@ -39,200 +56,9 @@ if (!$hasil) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kantin Sekolah - Riwayat Transaksi</title>
 
-    
-    <!-- CSS Internal (Soft Aesthetic Sage Green Theme) -->
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: #f4f6f4;
-            color: #4a5568;
-            padding: 40px 15px;
-        }
-
-        /* Sub-header Aesthetic */
-        .sub-tagline {
-            max-width: 950px;
-            margin: 0 auto 12px auto;
-            color: #789078;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .container {
-            max-width: 950px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 8px 30px rgba(107, 142, 108, 0.08);
-            overflow: hidden;
-            border: 1px solid #e2e8e2;
-        }
-
-        /* Header Gradasi Hijau Sage yang Lembut */
-        .card-header {
-            background: linear-gradient(135deg, #87a08b 0%, #6b8e6e 100%);
-            color: #ffffff;
-            padding: 28px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .card-header h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            margin-bottom: 4px;
-        }
-
-        .card-header p {
-            font-size: 0.875rem;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 9px 18px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.25 ease;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-light {
-            background-color: rgba(255, 255, 255, 0.25);
-            color: #ffffff;
-            backdrop-filter: blur(4px);
-        }
-
-        .btn-light:hover {
-            background-color: rgba(255, 255, 255, 0.35);
-        }
-
-        .btn-warning {
-            background-color: #f3dfc1;
-            color: #6b5335;
-        }
-
-        .btn-warning:hover {
-            background-color: #ebd3b0;
-        }
-
-        .card-body {
-            padding: 28px;
-        }
-
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background-color: #fafbfa;
-            color: #839284;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            padding: 14px 18px;
-            border-bottom: 2px solid #edf0ed;
-        }
-
-        td {
-            padding: 18px;
-            border-bottom: 1px solid #f2f4f2;
-            font-size: 0.9rem;
-            color: #4a5568;
-        }
-
-        tr {
-            transition: background-color 0.2s ease;
-        }
-
-        tr:hover {
-            background-color: #f7f9f7;
-        }
-
-        .badge-code {
-            background-color: #eaf1eb;
-            color: #4a6b4e;
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 8px;
-            font-size: 0.825rem;
-            display: inline-block;
-        }
-
-        .total-price {
-            font-weight: 700;
-            color: #557558;
-        }
-
-        .action-links {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.775rem;
-            border-radius: 8px;
-        }
-
-        .btn-info {
-            background-color: #e3edf7;
-            color: #4a6984;
-        }
-        .btn-info:hover { background-color: #d4e3f3; }
-
-        .btn-edit {
-            background-color: #f7eee3;
-            color: #84694a;
-        }
-        .btn-edit:hover { background-color: #f2e3d0; }
-
-        .btn-danger {
-            background-color: #f9e8e8;
-            color: #9c5252;
-        }
-        .btn-danger:hover { background-color: #f4d6d6; }
-
-        .empty-state {
-            text-align: center;
-            padding: 48px 20px;
-            color: #a0aec0;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/style.css">
 </head>
-<body>
+<body class="transaksi-page">
 
 <div class="sub-tagline">Fresh • Sehat • Enak • Bersahabat</div>
 
@@ -256,13 +82,14 @@ if (!$hasil) {
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 5%; text-align: center;">No</th>
-                            <th style="width: 13%;">Kode</th>
-                            <th style="width: 18%;">Nama Pembeli</th>
-                            <th style="width: 16%;">Tanggal</th>
-                            <th style="width: 14%;">Total</th>
-                            <th style="width: 22%;">Catatan</th>
-                            <th style="width: 12%; text-align: center;">Aksi</th>
+                            <th style="width: 4%; text-align: center;">No</th>
+                            <th style="width: 12%;">Kode</th>
+                            <th style="width: 15%;">Nama Pembeli</th>
+                            <th style="width: 13%;">Tanggal</th>
+                            <th style="width: 11%;">Total</th>
+                            <th style="width: 17%;">Catatan</th>
+                            <th style="width: 13%; text-align: center;">Status</th>
+                            <th style="width: 15%; text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -279,9 +106,19 @@ if (!$hasil) {
                             <td style="color: #718096;"><?php echo htmlspecialchars($data['tanggal_transaksi']); ?></td>
                             <td class="total-price">Rp <?php echo number_format($data['total_bayar'], 0, ',', '.'); ?></td>
                             <td><?php echo !empty($data['catatan_pesanan']) ? htmlspecialchars($data['catatan_pesanan']) : '-'; ?></td>
+                            <td style="text-align: center;">
+                                <?php if ($data['status_konfirmasi'] === 'dikonfirmasi'): ?>
+                                    <span class="badge-status badge-status-confirmed">✅ Dikonfirmasi</span>
+                                <?php else: ?>
+                                    <span class="badge-status badge-status-pending">⏳ Menunggu</span>
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <div class="action-links">
                                     <a href="detail.php?id=<?php echo $id_transaksi; ?>" class="btn btn-sm btn-info" title="Detail">Detail</a>
+                                    <?php if ($data['status_konfirmasi'] !== 'dikonfirmasi'): ?>
+                                        <a href="index.php?konfirmasi=<?php echo $id_transaksi; ?>" class="btn btn-sm btn-confirm" title="Konfirmasi Pesanan" onclick="return confirm('Konfirmasi pesanan ini?');">Konfirmasi</a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -290,7 +127,7 @@ if (!$hasil) {
                         } else { 
                         ?>
                         <tr>
-                            <td colspan="7" class="empty-state">
+                            <td colspan="8" class="empty-state">
                                 Belum ada data transaksi.
                             </td>
                         </tr>
