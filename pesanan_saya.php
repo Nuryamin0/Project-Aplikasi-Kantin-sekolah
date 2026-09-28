@@ -55,6 +55,56 @@ $hasil = mysqli_stmt_get_result($stmt);
     <title>Kantin Sekolah - Pesanan Saya</title>
 
     <link rel="stylesheet" href="assets/style.css">
+    <style>
+    /* Rapikan header Pesanan Saya */
+    .transaksi-page .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+    }
+    /* Teks atas */
+    .transaksi-page .sub-tagline {
+        text-align: center;
+        margin: 20px 0 10px;
+        color: #4a8f5a;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Tombol kembali */
+    .transaksi-page .btn-light {
+        display: inline-block;
+        padding: 9px 15px;
+        background: white;
+        color: #39834d;
+        border-radius: 7px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid #6bd582da;
+    }
+
+    .transaksi-page .btn-light:hover {
+        background: #d5fddf;
+    }
+
+    /* Kalau layar kecil */
+    @media (max-width: 600px) {
+        .transaksi-page .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .transaksi-page .btn-group {
+            width: 100%;
+        }
+
+        .transaksi-page .btn-light {
+            text-align: center;
+        }
+    }
+</style>
 </head>
 <body class="transaksi-page">
 
