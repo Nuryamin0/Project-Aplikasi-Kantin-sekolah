@@ -39,101 +39,104 @@ if (!$info_transaksi && $id_transaksi > 0) {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Nota - <?= htmlspecialchars($info_transaksi['kode_transaksi'] ?? 'Tidak Ditemukan'); ?></title>
     <link rel="stylesheet" href="../assets/style.css">
 </head>
+
 <body>
 
     <h1>Rincian Nota Transaksi</h1>
     <?php require __DIR__ . '/../includes/nav_admin.php'; ?>
-    
+
     <?php if ($info_transaksi): ?>
-    <div class="btn-group">
-        <a href="../transaksi/index.php" class="btn btn-light">Kembali ke detail transaksi</a>
-    </div>
-    <div class="table-container" style="max-width: 650px; padding: 20px; margin-top: 15px; margin-bottom: 20px;">
-        <h2 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">Informasi Pembeli & Nota</h2>
-        <table style="width: 100%; border: none;">
-            <tr>
-                <td style="width: 35%; border: none; padding: 6px 0;"><strong>Kode Transaksi</strong></td>
-                <td style="border: none; padding: 6px 0;">: <span class="badge badge-kat"><?= htmlspecialchars($info_transaksi['kode_transaksi']); ?></span></td>
-            </tr>
-            <tr>
-                <td style="border: none; padding: 6px 0;"><strong>Nama Pembeli</strong></td>
-                <td style="border: none; padding: 6px 0;">: <?= htmlspecialchars($info_transaksi['nama_pembeli']); ?></td>
-            </tr>
-            <tr>
-                <td style="border: none; padding: 6px 0;"><strong>Waktu Transaksi</strong></td>
-                <td style="border: none; padding: 6px 0;">: <?= date('d/m/Y H:i:s', strtotime($info_transaksi['tanggal_transaksi'])); ?></td>
-            </tr>
-            <tr>
-                <td style="border: none; padding: 6px 0;"><strong>Status</strong></td>
-                <td style="border: none; padding: 6px 0;">:
-                    <?php if (($info_transaksi['status_konfirmasi'] ?? 'menunggu') === 'dikonfirmasi'): ?>
-                        <span class="badge-status badge-status-confirmed">✅ Dikonfirmasi</span>
-                    <?php else: ?>
-                        <span class="badge-status badge-status-pending">⏳ Menunggu Konfirmasi</span>
-                    <?php endif; ?>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="table-container" style="max-width: 650px;">
-        <table>
-            <thead>
+        <div class="btn-group">
+            <a href="../transaksi/index.php" class="btn btn-light">Kembali ke detail transaksi</a>
+        </div>
+        <div class="table-container" style="max-width: 650px; padding: 20px; margin-top: 15px; margin-bottom: 20px;">
+            <h2 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">Informasi Pembeli & Nota</h2>
+            <table style="width: 100%; border: none;">
                 <tr>
-                    <th>No</th>
-                    <th>Nama Menu</th>
-                    <th>Harga Satuan</th>
-                    <th>Jumlah</th>
-                    <th>Subtotal</th>
-                    <th>Catatan</th>
+                    <td style="width: 35%; border: none; padding: 6px 0;"><strong>Kode Transaksi</strong></td>
+                    <td style="border: none; padding: 6px 0;">: <span class="badge badge-kat"><?= htmlspecialchars($info_transaksi['kode_transaksi']); ?></span></td>
                 </tr>
-            </thead>
-            <tbody>
-                <?php 
-                $no = 1;
-                $grand_total = 0;
-                foreach ($items as $item): 
-                    $grand_total += $item['subtotal'];
-                ?>
                 <tr>
-                    <td><?= $no++; ?></td>
-                    <td><strong><?= htmlspecialchars($item['nama_menu']); ?></strong></td>
-                    <td>Rp <?= number_format($item['harga'], 0, ',', '.'); ?></td>
-                    <td><?= $item['jumlah']; ?>x</td>
-                    <td>Rp <?= number_format($item['subtotal'], 0, ',', '.'); ?></td>
-                    <td><?= !empty($item['catatan']) ? htmlspecialchars($item['catatan']) : '-'; ?></td>
+                    <td style="border: none; padding: 6px 0;"><strong>Nama Pembeli</strong></td>
+                    <td style="border: none; padding: 6px 0;">: <?= htmlspecialchars($info_transaksi['nama_pembeli']); ?></td>
                 </tr>
-                <?php endforeach; ?>
-
-                <?php if (empty($items)): ?>
                 <tr>
-                    <td colspan="6" style="text-align: center; font-style: italic;">Tidak ada rincian item.</td>
+                    <td style="border: none; padding: 6px 0;"><strong>Waktu Transaksi</strong></td>
+                    <td style="border: none; padding: 6px 0;">: <?= date('d/m/Y H:i:s', strtotime($info_transaksi['tanggal_transaksi'])); ?></td>
                 </tr>
-                <?php endif; ?>
-            </tbody>
-            <tfoot>
-                <tr style="background-color: #f8fafc;">
-                    <td colspan="4" style="text-align: right; font-weight: bold; padding: 14px 16px;">Total Pembayaran:</td>
-                    <td style="font-weight: bold; color: #16a34a; font-size: 1.05rem; padding: 14px 16px;">
-                        Rp <?= number_format($info_transaksi['total_bayar'] ?? $grand_total, 0, ',', '.'); ?>
+                <tr>
+                    <td style="border: none; padding: 6px 0;"><strong>Status</strong></td>
+                    <td style="border: none; padding: 6px 0;">:
+                        <?php if (($info_transaksi['status_konfirmasi'] ?? 'menunggu') === 'dikonfirmasi'): ?>
+                            <span class="badge-status badge-status-confirmed">✅ Dikonfirmasi</span>
+                        <?php else: ?>
+                            <span class="badge-status badge-status-pending">⏳ Menunggu Konfirmasi</span>
+                        <?php endif; ?>
                     </td>
-                    <td style="padding: 14px 16px;"></td>
                 </tr>
-            </tfoot>
-        </table>
-    </div>
+            </table>
+        </div>
+
+        <div class="table-container" style="max-width: 650px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Menu</th>
+                        <th>Harga Satuan</th>
+                        <th>Jumlah</th>
+                        <th>Subtotal</th>
+                        <th>Catatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $no = 1;
+                    $grand_total = 0;
+                    foreach ($items as $item):
+                        $grand_total += $item['subtotal'];
+                    ?>
+                        <tr>
+                            <td><?= $no++; ?></td>
+                            <td><strong><?= htmlspecialchars($item['nama_menu']); ?></strong></td>
+                            <td>Rp <?= number_format($item['harga'], 0, ',', '.'); ?></td>
+                            <td><?= $item['jumlah']; ?>x</td>
+                            <td>Rp <?= number_format($item['subtotal'], 0, ',', '.'); ?></td>
+                            <td><?= !empty($item['catatan']) ? htmlspecialchars($item['catatan']) : '-'; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                    <?php if (empty($items)): ?>
+                        <tr>
+                            <td colspan="6" style="text-align: center; font-style: italic;">Tidak ada rincian item.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #f8fafc;">
+                        <td colspan="4" style="text-align: right; font-weight: bold; padding: 14px 16px;">Total Pembayaran:</td>
+                        <td style="font-weight: bold; color: #16a34a; font-size: 1.05rem; padding: 14px 16px;">
+                            Rp <?= number_format($info_transaksi['total_bayar'] ?? $grand_total, 0, ',', '.'); ?>
+                        </td>
+                        <td style="padding: 14px 16px;"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
     <?php else: ?>
         <div class="alert alert-danger" style="margin-top: 15px;">
             <span class="alert-icon">⚠️</span>
-            <div>Data transaksi tidak ditemukan atau sudah dihapus.</div>
+            <div>Data transaksi tidak ditemukan atau telah dihapus.</div>
         </div>
     <?php endif; ?>
 
 </body>
+
 </html>

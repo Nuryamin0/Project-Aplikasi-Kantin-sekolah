@@ -148,141 +148,146 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 // 4. CABANG 1: FORM LOGIN & REGISTER (Jika Belum Login)
 if (!isset($_SESSION['role'])) :
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login & Registrasi - Aplikasi Kantin Sekolah</title>
-    <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
-</head>
-<body class="login-body">
-    <div class="auth-container">
-        <!-- Header / Logo Brand -->
-        <div class="auth-header">
-            <div class="auth-logo">🍔</div>
-            <h2>Kantin Sekolah</h2>
-            <p class="auth-subtitle">Sistem Manajemen & Pemesanan Kantin</p>
+
+
+    <!DOCTYPE html>
+    <html lang="id">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login & Registrasi - Aplikasi Kantin Sekolah</title>
+        <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
+    </head>
+
+    <body class="login-body">
+        <div class="auth-container">
+            <!-- Header / Logo Brand -->
+            <div class="auth-header">
+                <div class="auth-logo">🍔</div>
+                <h2>Kantin Sekolah</h2>
+                <p class="auth-subtitle">Sistem Manajemen & Pemesanan Kantin</p>
+            </div>
+
+            <div class="login-card">
+                <!-- Navigasi Tab Login vs Register -->
+                <div class="auth-tabs">
+                    <button type="button" class="tab-btn <?= ($active_tab === 'login') ? 'active' : ''; ?>" id="tab-login-btn" onclick="switchAuthTab('login')">
+                        Masuk
+                    </button>
+                    <button type="button" class="tab-btn <?= ($active_tab === 'register') ? 'active' : ''; ?>" id="tab-register-btn" onclick="switchAuthTab('register')">
+                        Daftar Akun
+                    </button>
+                </div>
+
+                <!-- Pesan Alert / Feedback -->
+                <?php if (!empty($register_success)): ?>
+                    <div class="alert alert-success">
+                        <span class="alert-icon">✓</span>
+                        <div><?= $register_success; ?></div>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($login_error)): ?>
+                    <div class="alert alert-danger" id="login-alert">
+                        <span class="alert-icon">⚠️</span>
+                        <div><?= $login_error; ?></div>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($register_error)): ?>
+                    <div class="alert alert-danger" id="register-alert">
+                        <span class="alert-icon">⚠️</span>
+                        <div><?= $register_error; ?></div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- PANEL 1: FORM LOGIN -->
+                <div class="auth-panel <?= ($active_tab === 'login') ? 'active' : ''; ?>" id="login-panel">
+                    <form method="POST" action="">
+                        <div class="form-group">
+                            <label for="login-username">Username</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="login-username" name="username" placeholder="Masukkan username" required autocomplete="username" value="<?= isset($_POST['login']) ? htmlspecialchars($_POST['username'] ?? '') : ''; ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="login-password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
+                                <button type="button" class="btn-toggle-pwd" onclick="togglePassword('login-password', this)" title="Tampilkan/Sembunyikan Password">👁️</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" name="login" class="btn-primary">
+                            Masuk ke Akun
+                        </button>
+                    </form>
+
+                    <div class="auth-footer">
+                        <span>Belum punya akun?</span>
+                        <a href="javascript:void(0)" onclick="switchAuthTab('register')" class="auth-link">Daftar sekarang</a>
+                    </div>
+                </div>
+
+                <!-- PANEL 2: FORM REGISTRASI -->
+                <div class="auth-panel <?= ($active_tab === 'register') ? 'active' : ''; ?>" id="register-panel">
+                    <form method="POST" action="">
+                        <div class="form-group">
+                            <label for="reg-nama">Nama Lengkap</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">📝</span>
+                                <input type="text" id="reg-nama" name="nama_lengkap" placeholder="Contoh: Budi Santoso" required autocomplete="name" value="<?= isset($_POST['register']) ? htmlspecialchars($_POST['nama_lengkap'] ?? '') : ''; ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-username">Username</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="reg-username" name="username" placeholder="Huruf / angka, contoh: budi123" required autocomplete="username" value="<?= isset($_POST['register']) ? htmlspecialchars($_POST['username'] ?? '') : ''; ?>">
+                            </div>
+                            <small class="form-hint">Gunakan huruf, angka, atau underscore (_) tanpa spasi.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-password">Password</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="reg-password" name="password" placeholder="Minimal 4 karakter" required autocomplete="new-password">
+                                <button type="button" class="btn-toggle-pwd" onclick="togglePassword('reg-password', this)" title="Tampilkan/Sembunyikan Password">👁️</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-confirm">Konfirmasi Password</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">🔐</span>
+                                <input type="password" id="reg-confirm" name="confirm_password" placeholder="Ulangi password Anda" required autocomplete="new-password">
+                                <button type="button" class="btn-toggle-pwd" onclick="togglePassword('reg-confirm', this)" title="Tampilkan/Sembunyikan Password">👁️</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" name="register" class="btn-primary btn-success-action">
+                            Daftar Sekarang
+                        </button>
+                    </form>
+
+                    <div class="auth-footer">
+                        <span>Sudah memiliki akun?</span>
+                        <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="auth-link">Masuk di sini</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="login-card">
-            <!-- Navigasi Tab Login vs Register -->
-            <div class="auth-tabs">
-                <button type="button" class="tab-btn <?= ($active_tab === 'login') ? 'active' : ''; ?>" id="tab-login-btn" onclick="switchAuthTab('login')">
-                    Masuk
-                </button>
-                <button type="button" class="tab-btn <?= ($active_tab === 'register') ? 'active' : ''; ?>" id="tab-register-btn" onclick="switchAuthTab('register')">
-                    Daftar Akun
-                </button>
-            </div>
+        <script src="assets/script.js?v=<?= time(); ?>"></script>
+    </body>
 
-            <!-- Pesan Alert / Feedback -->
-            <?php if (!empty($register_success)): ?>
-                <div class="alert alert-success">
-                    <span class="alert-icon">✓</span>
-                    <div><?= $register_success; ?></div>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($login_error)): ?>
-                <div class="alert alert-danger" id="login-alert">
-                    <span class="alert-icon">⚠️</span>
-                    <div><?= $login_error; ?></div>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($register_error)): ?>
-                <div class="alert alert-danger" id="register-alert">
-                    <span class="alert-icon">⚠️</span>
-                    <div><?= $register_error; ?></div>
-                </div>
-            <?php endif; ?>
-
-            <!-- PANEL 1: FORM LOGIN -->
-            <div class="auth-panel <?= ($active_tab === 'login') ? 'active' : ''; ?>" id="login-panel">
-                <form method="POST" action="">
-                    <div class="form-group">
-                        <label for="login-username">Username</label>
-                        <div class="input-with-icon">
-                            <span class="input-icon">👤</span>
-                            <input type="text" id="login-username" name="username" placeholder="Masukkan username" required autocomplete="username" value="<?= isset($_POST['login']) ? htmlspecialchars($_POST['username'] ?? '') : ''; ?>">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="login-password">Password</label>
-                        <div class="input-with-icon">
-                            <span class="input-icon">🔒</span>
-                            <input type="password" id="login-password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
-                            <button type="button" class="btn-toggle-pwd" onclick="togglePassword('login-password', this)" title="Tampilkan/Sembunyikan Password">👁️</button>
-                        </div>
-                    </div>
-
-                    <button type="submit" name="login" class="btn-primary">
-                        Masuk ke Akun
-                    </button>
-                </form>
-
-                <div class="auth-footer">
-                    <span>Belum punya akun?</span>
-                    <a href="javascript:void(0)" onclick="switchAuthTab('register')" class="auth-link">Daftar sekarang</a>
-                </div>
-            </div>
-
-            <!-- PANEL 2: FORM REGISTRASI -->
-            <div class="auth-panel <?= ($active_tab === 'register') ? 'active' : ''; ?>" id="register-panel">
-                <form method="POST" action="">
-                    <div class="form-group">
-                        <label for="reg-nama">Nama Lengkap</label>
-                        <div class="input-with-icon">
-                            <span class="input-icon">📝</span>
-                            <input type="text" id="reg-nama" name="nama_lengkap" placeholder="Contoh: Budi Santoso" required autocomplete="name" value="<?= isset($_POST['register']) ? htmlspecialchars($_POST['nama_lengkap'] ?? '') : ''; ?>">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reg-username">Username</label>
-                        <div class="input-with-icon">
-                            <span class="input-icon">👤</span>
-                            <input type="text" id="reg-username" name="username" placeholder="Huruf / angka, contoh: budi123" required autocomplete="username" value="<?= isset($_POST['register']) ? htmlspecialchars($_POST['username'] ?? '') : ''; ?>">
-                        </div>
-                        <small class="form-hint">Gunakan huruf, angka, atau underscore (_) tanpa spasi.</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reg-password">Password</label>
-                        <div class="input-with-icon">
-                            <span class="input-icon">🔒</span>
-                            <input type="password" id="reg-password" name="password" placeholder="Minimal 4 karakter" required autocomplete="new-password">
-                            <button type="button" class="btn-toggle-pwd" onclick="togglePassword('reg-password', this)" title="Tampilkan/Sembunyikan Password">👁️</button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reg-confirm">Konfirmasi Password</label>
-                        <div class="input-with-icon">
-                            <span class="input-icon">🔐</span>
-                            <input type="password" id="reg-confirm" name="confirm_password" placeholder="Ulangi password Anda" required autocomplete="new-password">
-                            <button type="button" class="btn-toggle-pwd" onclick="togglePassword('reg-confirm', this)" title="Tampilkan/Sembunyikan Password">👁️</button>
-                        </div>
-                    </div>
-
-                    <button type="submit" name="register" class="btn-primary btn-success-action">
-                        Daftar Sekarang
-                    </button>
-                </form>
-
-                <div class="auth-footer">
-                    <span>Sudah memiliki akun?</span>
-                    <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="auth-link">Masuk di sini</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="assets/script.js?v=<?= time(); ?>"></script>
-</body>
-</html>
+    </html>
 
 <?php
 // 5. CABANG 2: DASHBOARD ADMIN (Jika Role = 'admin')
@@ -335,159 +340,146 @@ elseif ($_SESSION['role'] === 'admin') :
         }
     }
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Kantin</title>
-    <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
-</head>
-<body>
+    <!DOCTYPE html>
+    <html lang="id">
 
-    <div class="header">
-        <h1>Dashboard Admin Kantin</h1>
-        <div class="header-actions">
-            <a href="menu/tambah.php" class="btn-add">+ Tambah Menu Baru</a>
-            <a href="transaksi/index.php" class="btn-add" style="background-color:#16a34a;">riwayat Transaksi</a>
-            <a href="#" class="btn-logout" onclick="openAdminLogout(event)">Logout (<?= htmlspecialchars($_SESSION['nama']); ?>)</a>
-        </div>
-    </div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard Admin - Kantin</title>
+        <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
+    </head>
 
-    <!-- Ringkasan Statistik -->
-    <div class="stats-grid">
-        <div class="stat-card green">
-            <h3>Total Pendapatan</h3>
-            <p>Rp <?= number_format($total_pendapatan, 0, ',', '.'); ?></p>
-        </div>
-        <div class="stat-card purple">
-            <h3>Total Transaksi</h3>
-            <p><?= $total_transaksi; ?></p>
-        </div>
-        <div class="stat-card">
-            <h3>Jumlah Menu</h3>
-            <p><?= $total_menu; ?></p>
-        </div>
-        <div class="stat-card orange">
-            <h3>Stok Menipis (<5)</h3>
-            <p><?= $stok_sedikit; ?> Menu</p>
-        </div>
-    </div>
+    <body>
 
-    <!-- Tabel Kelola Menu -->
-    <h2 class="section-title">Daftar Menu Kantin</h2>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Foto</th>
-                    <th>Nama Menu</th>
-                    <th>Kategori</th>
-                    <th>Harga</th>
-                    <th>Stok</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($data_menu)): ?>
-                    <?php foreach ($data_menu as $menu): ?>
+        <div class="header">
+            <h1>Dashboard Admin Kantin</h1>
+            <div class="header-actions">
+                <a href="menu/tambah.php" class="btn-add">+ Tambah Menu Baru</a>
+                <a href="transaksi/index.php" class="btn-add" style="background-color:#16a34a;">riwayat Transaksi</a>
+                <a href="?action=logout" class="btn-logout">Logout (<?= htmlspecialchars($_SESSION['nama']); ?>)</a>
+            </div>
+        </div>
+
+        <!-- Ringkasan Statistik -->
+        <div class="stats-grid">
+            <div class="stat-card green">
+                <h3>Total Pendapatan</h3>
+                <p>Rp <?= number_format($total_pendapatan, 0, ',', '.'); ?></p>
+            </div>
+            <div class="stat-card purple">
+                <h3>Total Transaksi</h3>
+                <p><?= $total_transaksi; ?></p>
+            </div>
+            <div class="stat-card">
+                <h3>Jumlah Menu</h3>
+                <p><?= $total_menu; ?></p>
+            </div>
+            <div class="stat-card orange">
+                <h3>Stok Menipis (-5)</h3>
+                <p><?= $stok_sedikit; ?> Menu</p>
+            </div>
+        </div>
+
+        <!-- Tabel Kelola Menu -->
+        <h2 class="section-title">Daftar Menu Kantin</h2>
+        <div class="table-container">
+            <table class="table-stack">
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Nama Menu</th>
+                        <th>Kategori</th>
+                        <th>Harga</th>
+                        <th>Stok</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($data_menu)): ?>
+                        <?php foreach ($data_menu as $menu): ?>
+                            <tr>
+                                <td data-label="Foto">
+                                    <?php if (!empty($menu['foto'])): ?>
+                                        <img src="menu/uploads/<?= htmlspecialchars($menu['foto']); ?>" alt="Foto" class="img-thumb" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'45\' height=\'45\' viewBox=\'0 0 45 45\'%3E%3Crect width=\'45\' height=\'45\' fill=\'%23e2e8f0\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'20\'%3E🍽️%3C/text%3E%3C/svg%3E';">
+                                    <?php else: ?>
+                                        <div style="width: 45px; height: 45px; background: #e2e8f0; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem;">🍽️</div>
+                                    <?php endif; ?>
+                                </td>
+                                <td data-label="Menu"><strong><?= htmlspecialchars($menu['nama_menu'] ?? $menu['nama_produk'] ?? ''); ?></strong></td>
+                                <td data-label="Kategori"><span class="badge badge-kat"><?= htmlspecialchars($menu['kategori'] ?? ''); ?></span></td>
+                                <td data-label="Harga">Rp <?= number_format($menu['harga'] ?? 0, 0, ',', '.'); ?></td>
+                                <td data-label="Stok">
+                                    <?= $menu['stok'] ?? 0; ?>
+                                    <?php if (($menu['stok'] ?? 0) < 5): ?>
+                                        <span class="badge badge-stok">Sedikit</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td data-label="Aksi">
+                                    <a href="menu/edit.php?id_menu=<?= $menu['id_menu']; ?>" class="btn-action btn-edit">Edit</a>
+                                    <a href="menu/hapus.php?id_menu=<?= $menu['id_menu']; ?>" class="btn-action btn-delete" onclick="return confirm('Yakin ingin menghapus menu ini?')">Hapus</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
                         <tr>
-                            <td>
-                                <?php if (!empty($menu['foto'])): ?>
-                                    <img src="menu/uploads/<?= htmlspecialchars($menu['foto']); ?>" alt="Foto" class="img-thumb" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'45\' height=\'45\' viewBox=\'0 0 45 45\'%3E%3Crect width=\'45\' height=\'45\' fill=\'%23e2e8f0\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'20\'%3E🍽️%3C/text%3E%3C/svg%3E';">
-                                <?php else: ?>
-                                    <div style="width: 45px; height: 45px; background: #e2e8f0; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem;">🍽️</div>
-                                <?php endif; ?>
-                            </td>
-                            <td><strong><?= htmlspecialchars($menu['nama_menu'] ?? $menu['nama_produk'] ?? ''); ?></strong></td>
-                            <td><span class="badge badge-kat"><?= htmlspecialchars($menu['kategori'] ?? ''); ?></span></td>
-                            <td>Rp <?= number_format($menu['harga'] ?? 0, 0, ',', '.'); ?></td>
-                            <td>
-                                <?= $menu['stok'] ?? 0; ?>
-                                <?php if (($menu['stok'] ?? 0) < 5): ?>
-                                    <span class="badge badge-stok">Sedikit</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <a href="menu/edit.php?id_menu=<?= $menu['id_menu']; ?>" class="btn-action btn-edit">Edit</a>
-                                <a href="menu/hapus.php?id_menu=<?= $menu['id_menu']; ?>" class="btn-action btn-delete" onclick="return confirm('Yakin ingin menghapus menu ini?')">Hapus</a>
-                            </td>
+                            <td colspan="6" style="text-align:center;">Belum ada data menu di database.</td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="6" style="text-align:center;">Belum ada data menu di database.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Tabel Transaksi Terakhir -->
-    <h2 class="section-title">10 Transaksi Terakhir</h2>
-    <div class="table-container">
-        <table> 
-            <thead>
-                <tr>
-                    <th>Kode TX</th>
-                    <th>Nama Pembeli</th>
-                    <th>Detail Pesanan</th>
-                    <th>Tanggal</th>
-                    <th>Total Bayar</th>
-                    <th>Catatan</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($data_transaksi)): ?>
-                    <?php foreach ($data_transaksi as $tx): ?>
-                        <tr>
-                            <td><strong><?= htmlspecialchars($tx['kode_transaksi']); ?></strong></td>
-                            <td><?= htmlspecialchars($tx['nama_pembeli']); ?></td>
-                            <td><?= htmlspecialchars($tx['item_dibeli'] ?? 'Tidak ada item'); ?></td>
-                            <td><?= date('d/m/Y H:i', strtotime($tx['tanggal_transaksi'])); ?></td>
-                            <td><strong>Rp <?= number_format($tx['total_bayar'], 0, ',', '.'); ?></strong></td>
-                            <td><?= !empty($tx['catatan_pesanan']) ? htmlspecialchars($tx['catatan_pesanan']) : '-'; ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="6" style="text-align:center;">Belum ada data transaksi di database.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-    
-    <!-- POP UP LOGOUT ADMIN -->
-<div id="adminLogoutPopup" class="admin-logout-popup">
-    <div class="admin-logout-box">
-        <h3>Logout?</h3>
-        <p>Yakin ingin keluar dari akun admin?</p>
-
-        <div class="admin-logout-buttons">
-            <button type="button" onclick="closeAdminLogout()">Batal</button>
-            <a href="?action=logout">Logout</a>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-    </div>
-</div>
 
-<script>
-function openAdminLogout(event) {
-    event.preventDefault();
-    document.getElementById("adminLogoutPopup").classList.add("show");
-}
+        <!-- Tabel Transaksi Terakhir -->
+        <h2 class="section-title">10 Transaksi Terakhir</h2>
+        <div class="table-container">
+            <table class="table-stack">
+                <thead>
+                    <tr>
+                        <th>Kode TX</th>
+                        <th>Nama Pembeli</th>
+                        <th>Detail Pesanan</th>
+                        <th>Tanggal</th>
+                        <th>Total Bayar</th>
+                        <th>Catatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($data_transaksi)): ?>
+                        <?php foreach ($data_transaksi as $tx): ?>
+                            <tr>
+                                <td data-label="Kode TX"><strong><?= htmlspecialchars($tx['kode_transaksi']); ?></strong></td>
+                                <td data-label="Pembeli"><?= htmlspecialchars($tx['nama_pembeli']); ?></td>
+                                <td data-label="Pesanan"><?= htmlspecialchars($tx['item_dibeli'] ?? 'Tidak ada item'); ?></td>
+                                <td data-label="Tanggal"><?= date('d/m/Y H:i', strtotime($tx['tanggal_transaksi'])); ?></td>
+                                <td data-label="Total Bayar"><strong>Rp <?= number_format($tx['total_bayar'], 0, ',', '.'); ?></strong></td>
+                                <td data-label="Catatan"><?= !empty($tx['catatan_pesanan']) ? htmlspecialchars($tx['catatan_pesanan']) : '-'; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="6" style="text-align:center;">Belum ada data transaksi di database.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
 
-function closeAdminLogout() {
-    document.getElementById("adminLogoutPopup").classList.remove("show");
-}
-</script>
-</body>
-</html>
+    </body>
+
+    </html>
 
 <?php
 // 6. CABANG 3: KATALOG PEMBELI & CHECKOUT DENGAN CATATAN (Jika Role = 'user')
 else :
     // Proses jika form checkout dikirim
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_pesanan'])) {$id_user = $_SESSION['id_user'];$nama_pembeli = $_SESSION['nama'] ?? 'Siswa';$kode_transaksi = 'TRX-' . time() . '-' . rand(100, 999);
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_pesanan'])) {
+        $id_user = $_SESSION['id_user'];
+        $nama_pembeli = $_SESSION['nama'] ?? 'Siswa';
+        $kode_transaksi = 'TRX-' . time() . '-' . rand(100, 999);
         $tanggal_transaksi = date('Y-m-d H:i:s');
-        
-        $items_json =$_POST['cart_data'] ?? '';
+
+        $items_json = $_POST['cart_data'] ?? '';
         $cart_items = json_decode($items_json, true);
 
         if (empty($cart_items)) {
@@ -497,7 +489,8 @@ else :
 
         // Hitung total bayar
         $total_bayar = 0;
-        foreach ($cart_items as $item) {$total_bayar += ($item['price'] *$item['quantity']);
+        foreach ($cart_items as $item) {
+            $total_bayar += ($item['price'] * $item['quantity']);
         }
 
         mysqli_begin_transaction($koneksi);
@@ -571,259 +564,443 @@ else :
     $data_menu_user = [];
     if ($q_menu_user) {
         while ($row = mysqli_fetch_assoc($q_menu_user)) {
-            $data_menu_user[] =$row;
+            $data_menu_user[] = $row;
         }
     }
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Menu - Kantin Sekolah</title>
-    <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
-    <style>
-        .catalog-container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
-        .floating-cart-btn {
-            position: fixed; bottom: 30px; right: 30px; background-color: #16a34a; color: white;
-            border: none; width: 65px; height: 65px; border-radius: 50%; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.25); display: flex; justify-content: center;
-            align-items: center; font-size: 1.6rem; z-index: 999; transition: transform 0.2s ease;
-        }
-        .floating-cart-btn:hover { transform: scale(1.1); background-color: #15803d; }
-        .cart-badge {
-            position: absolute; top: 5px; right: 5px; background-color: #dc2626; color: white;
-            font-size: 0.75rem; font-weight: bold; padding: 2px 7px; border-radius: 50px; border: 2px solid white;
-        }
-        .cart-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
-            z-index: 1000; display: none; opacity: 0; transition: opacity 0.3s ease;
-        }
-        .cart-overlay.show { display: block; opacity: 1; }
-        .cart-drawer {
-            position: fixed; top: 0; right: -420px; width: 100%; max-width: 400px; height: 100%;
-            background: white; z-index: 1001; box-shadow: -5px 0 25px rgba(0,0,0,0.15);
-            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;
-        }
-        .cart-drawer.open { right: 0; }
-        .cart-drawer-header { padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-        .cart-drawer-body { padding: 20px; flex: 1; overflow-y: auto; }
-        .cart-item-row { padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
-        .cart-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .cart-item-row button { padding: 2px 8px; background: #e2e8f0; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .input-note { width: 100%; padding: 6px 8px; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 6px; }
-        .cart-drawer-footer { padding: 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
-        .summary-flex { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.1rem; color: #1e293b; }
-        .btn-checkout-main { width: 100%; background-color: #16a34a; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-checkout-main:hover { background-color: #15803d; }
-        .close-drawer-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #64748b; }
-    </style>
-</head>
-<body>
+    <!DOCTYPE html>
+    <html lang="id">
 
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Katalog Menu - Kantin Sekolah</title>
+        <link rel="stylesheet" href="assets/style.css?v=<?= time(); ?>">
+        <style>
+            .catalog-container {
+                max-width: 1200px;
+                margin: 20px auto;
+                padding: 0 15px;
+            }
 
-    <!-- Aksesoris sayuran lucu -->
-    <div class="veggie-decoration veggie-carrot">🍜</div>
-    <div class="veggie-decoration veggie-broccoli">🧋</div>
-    <div class="veggie-decoration veggie-tomato">☕</div>
-    <div class="veggie-decoration veggie-corn">🍟</div>
+            .floating-cart-btn {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                background-color: #16a34a;
+                color: white;
+                border: none;
+                width: 65px;
+                height: 65px;
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 1.6rem;
+                z-index: 999;
+                transition: transform 0.2s ease;
+            }
 
-    <!-- POP UP WELCOME -->
-<div class="welcome-popup" id="welcomePopup">
-    <div class="popup-card">
+            .floating-cart-btn:hover {
+                transform: scale(1.1);
+                background-color: #15803d;
+            }
 
-        <button class="popup-close" onclick="closePopup()">×</button>
+            .cart-badge {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                background-color: #dc2626;
+                color: white;
+                font-size: 0.75rem;
+                font-weight: bold;
+                padding: 2px 7px;
+                border-radius: 50px;
+                border: 2px solid white;
+            }
 
-        <div class="popup-icon">🍽️</div>
+            .cart-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                display: none;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
 
-        <h2>Selamat Datang! 🍚</h2>
+            .cart-overlay.show {
+                display: block;
+                opacity: 1;
+            }
 
-        <p>
-            Selamat datang di <b>Kantin Sehat</b>!
-            Yuk pilih makanan favoritmu dan tetap sehat
-        </p>
+            .cart-drawer {
+                position: fixed;
+                top: 0;
+                right: -420px;
+                width: 100%;
+                max-width: 400px;
+                height: 100%;
+                background: white;
+                z-index: 1001;
+                box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
+                transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                display: flex;
+                flex-direction: column;
+            }
 
-        <button class="popup-button" onclick="closePopup()">
-            Yuk Jajan!
-        </button>
+            .cart-drawer.open {
+                right: 0;
+            }
 
-    </div>
-</div>
+            .cart-drawer-header {
+                padding: 20px;
+                background: #f8fafc;
+                border-bottom: 1px solid #e2e8f0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
 
-<script>
-     function closePopup() {
-    const popup = document.getElementById("welcomePopup");
+            .cart-drawer-body {
+                padding: 20px;
+                flex: 1;
+                overflow-y: auto;
+            }
 
-    popup.style.opacity = "0";
+            .cart-item-row {
+                padding: 12px 0;
+                border-bottom: 1px solid #f1f5f9;
+            }
 
-    setTimeout(() => {
-        popup.style.display = "none";
-    }, 300);
-    }
-</script>
+            .cart-item-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 6px;
+            }
 
-    <div class="header">
-        <div>
-            <h1>Selamat Datang, <?= htmlspecialchars($_SESSION['nama']); ?>! 👋</h1>
-            <p style="color: #64748b; font-size: 0.9rem; margin-top: 4px;">Akun Pembeli / Siswa</p>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <a href="pesanan_saya.php" class="btn-add" style="background-color:#2563eb;">📦 Pesanan Saya</a>
-            <a href="#" class="btn-logout" onclick="showLogoutPopup(event)">Logout</a>
-        </div>
-    </div>
+            .cart-item-row button {
+                padding: 2px 8px;
+                background: #e2e8f0;
+                border: none;
+                cursor: pointer;
+                border-radius: 4px;
+                font-weight: bold;
+            }
 
-    <div class="catalog-container">
-        <h2 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 15px;">Daftar Menu Makanan & Minuman Tersedia</h2>
+            .input-note {
+                width: 100%;
+                padding: 6px 8px;
+                font-size: 0.8rem;
+                border: 1px solid #cbd5e1;
+                border-radius: 4px;
+                margin-top: 6px;
+            }
 
-        <div class="menu-grid">
-            <?php if (!empty($data_menu_user)): ?>
-                <?php foreach ($data_menu_user as$item): ?>
-                    <div class="menu-card">
-                        <img src="menu/uploads/<?= htmlspecialchars($item['foto'] ?? ''); ?>" alt="Foto" onerror="this.src='https://via.placeholder.com/220x150'">
-                        <div class="card-body">
-                            <div>
-                                <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
-                                <div class="menu-title"><?= htmlspecialchars($item['nama_menu'] ?? $item['nama_produk'] ?? ''); ?></div>
-                                <div class="menu-price">Rp <?= number_format($item['harga'], 0, ',', '.'); ?></div>
-                                <small style="color: #64748b;">Sisa stok: <strong><?= $item['stok']; ?></strong></small>
+            .cart-drawer-footer {
+                padding: 20px;
+                background: #f8fafc;
+                border-top: 1px solid #e2e8f0;
+            }
+
+            .summary-flex {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 15px;
+                font-size: 1.1rem;
+                color: #1e293b;
+            }
+
+            .btn-checkout-main {
+                width: 100%;
+                background-color: #16a34a;
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 6px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .btn-checkout-main:hover {
+                background-color: #15803d;
+            }
+
+            .close-drawer-btn {
+                background: none;
+                border: none;
+                font-size: 1.3rem;
+                cursor: pointer;
+                color: #64748b;
+            }
+            /* ---- Perbaikan tampilan HP ---- */
+            .cart-drawer {
+                top: 0;
+                bottom: 0;
+                height: auto;
+            }
+
+            .cart-scroll {
+                flex: 1;
+                min-height: 0;
+                overflow-y: auto;
+                padding: 20px;
+            }
+
+            .cart-item-top > div:first-child {
+                min-width: 0;
+                word-break: break-word;
+            }
+
+            @media (max-width: 640px) {
+                .catalog-container {
+                    margin: 12px auto;
+                    padding: 0 0 90px;
+                }
+
+                .catalog-container > h2 {
+                    font-size: 1.05rem !important;
+                }
+
+                .floating-cart-btn {
+                    bottom: 18px;
+                    right: 18px;
+                    width: 56px;
+                    height: 56px;
+                    font-size: 1.4rem;
+                }
+
+                .cart-scroll,
+                .cart-drawer-footer,
+                .cart-drawer-header {
+                    padding: 16px;
+                }
+
+                .cart-item-row button {
+                    min-width: 34px;
+                    min-height: 34px;
+                    font-size: 1rem;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+
+            <!-- Aksesoris sayuran lucu -->
+            <div class="veggie-decoration veggie-carrot">🍜</div>
+            <div class="veggie-decoration veggie-broccoli">🧋</div>
+            <div class="veggie-decoration veggie-tomato">☕</div>
+            <div class="veggie-decoration veggie-corn">🍟</div>
+
+            <!-- POP UP WELCOME -->
+            <div class="welcome-popup" id="welcomePopup">
+                <div class="popup-card">
+
+                    <button class="popup-close" onclick="closePopup()">×</button>
+
+                    <div class="popup-icon">🍽️</div>
+
+                    <h2>Selamat Datang! 🍚</h2>
+
+                    <p>
+                        Selamat datang di <b>Kantin Sehat</b>!
+                        Yuk pilih makanan favoritmu dan tetap sehat
+                    </p>
+
+                    <button class="popup-button" onclick="closePopup()">
+                        Yuk Jajan!
+                    </button>
+
+                </div>
+            </div>
+
+            <script>
+                function closePopup() {
+                    const popup = document.getElementById("welcomePopup");
+
+                    popup.style.opacity = "0";
+
+                    setTimeout(() => {
+                        popup.style.display = "none";
+                    }, 300);
+                }
+            </script>
+
+            <div class="header">
+                <div>
+                    <h1>Selamat Datang, <?= htmlspecialchars($_SESSION['nama']); ?>! 👋</h1>
+                    <p style="color: #64748b; font-size: 0.9rem; margin-top: 4px;">Akun Pembeli / Siswa</p>
+                </div>
+                <div class="header-actions">
+                    <a href="pesanan_saya.php" class="btn-add" style="background-color:#2563eb;">📦 Pesanan Saya</a>
+                    <a href="?action=logout" class="btn-logout">Logout</a>
+                </div>
+            </div>
+
+            <div class="catalog-container">
+                <h2 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 15px;">Daftar Menu Makanan & Minuman Tersedia</h2>
+
+                <div class="menu-grid">
+                    <?php if (!empty($data_menu_user)): ?>
+                        <?php foreach ($data_menu_user as $item): ?>
+                            <div class="menu-card">
+                                <img src="menu/uploads/<?= htmlspecialchars($item['foto'] ?? ''); ?>" alt="Foto" onerror="this.src='https://via.placeholder.com/220x150'">
+                                <div class="card-body">
+                                    <div>
+                                        <span class="badge-kat"><?= htmlspecialchars($item['kategori']); ?></span>
+                                        <div class="menu-title"><?= htmlspecialchars($item['nama_menu'] ?? $item['nama_produk'] ?? ''); ?></div>
+                                        <div class="menu-price">Rp <?= number_format($item['harga'], 0, ',', '.'); ?></div>
+                                        <small style="color: #64748b;">Sisa stok: <strong><?= $item['stok']; ?></strong></small>
+                                    </div>
+                                    <button type="button" class="btn-buy" onclick="addToCart(<?= $item['id_menu']; ?>, '<?= htmlspecialchars(addslashes($item['nama_menu'] ?? '')); ?>', <?= $item['harga']; ?>, <?= $item['stok']; ?>)">
+                                        + Tambah ke Keranjang
+                                    </button>
+                                </div>
                             </div>
-                            <button type="button" class="btn-buy" onclick="addToCart(<?= $item['id_menu']; ?>, '<?= htmlspecialchars(addslashes($item['nama_menu'] ?? '')); ?>', <?= $item['harga']; ?>, <?=$item['stok']; ?>)">
-                                + Tambah ke Keranjang
-                            </button>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px; background: #fff; border-radius: 8px;">
+                            Belum ada menu yang tersedia saat ini.
+                        </p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Tombol Ikon Keranjang Mengambang -->
+            <button type="button" class="floating-cart-btn" onclick="toggleCartDrawer()" title="Buka Keranjang">
+                🛒
+                <span class="cart-badge" id="cart-counter">0</span>
+            </button>
+
+            <div class="cart-overlay" id="cartOverlay" onclick="toggleCartDrawer()"></div>
+
+            <!-- Form Drawer Keranjang -->
+            <div class="cart-drawer" id="cartDrawer">
+                <div class="cart-drawer-header">
+                    <h3>🛒 Keranjang Pesanan</h3>
+                    <button type="button" class="close-drawer-btn" onclick="toggleCartDrawer()">&times;</button>
+                </div>
+
+                <form method="POST" action="" id="checkoutForm" class="cart-drawer-body" style="display:flex; flex-direction:column; min-height:0; padding:0; overflow:hidden;">
+                    <input type="hidden" name="checkout_pesanan" value="1">
+                    <input type="hidden" name="cart_data" id="cartDataInput">
+
+                    <div class="cart-scroll">
+                        <!-- Informasi Nama Siswa -->
+                        <div style="background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
+                            👤 Pemesan: <strong><?= htmlspecialchars($_SESSION['nama']); ?></strong>
+                        </div>
+
+                        <div id="cart-items-container">
+                            <p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 40px 0;">Keranjang masih kosong</p>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px; background: #fff; border-radius: 8px;">
-                    Belum ada menu yang tersedia saat ini.
-                </p>
-            <?php endif; ?>
-        </div>
-    </div>
 
-    <!-- Tombol Ikon Keranjang Mengambang -->
-    <button type="button" class="floating-cart-btn" onclick="toggleCartDrawer()" title="Buka Keranjang">
-        🛒
-        <span class="cart-badge" id="cart-counter">0</span>
-    </button>
-
-    <div class="cart-overlay" id="cartOverlay" onclick="toggleCartDrawer()"></div>
-
-    <!-- Form Drawer Keranjang -->
-    <div class="cart-drawer" id="cartDrawer">
-        <div class="cart-drawer-header">
-            <h3>🛒 Keranjang Pesanan</h3>
-            <button type="button" class="close-drawer-btn" onclick="toggleCartDrawer()">&times;</button>
-        </div>
-        
-        <form method="POST" action="" id="checkoutForm" class="cart-drawer-body" style="display:flex; flex-direction:column; justify-content:space-between; height:100%; padding:20px;">
-            <input type="hidden" name="checkout_pesanan" value="1">
-            <input type="hidden" name="cart_data" id="cartDataInput">
-
-            <div>
-                <!-- Informasi Nama Siswa -->
-                <div style="background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
-                    👤 Pemesan: <strong><?= htmlspecialchars($_SESSION['nama']); ?></strong>
-                </div>
-
-                <div id="cart-items-container">
-                    <p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 40px 0;">Keranjang masih kosong</p>
-                </div>
+                    <div class="cart-drawer-footer">
+                        <div class="summary-flex">
+                            <span>Total:</span>
+                            <strong id="cart-total" style="color: #16a34a;">Rp 0</strong>
+                        </div>
+                        <button type="submit" class="btn-checkout-main" id="checkoutBtn" disabled style="opacity: 0.6; cursor: not-allowed;" onclick="prepareCheckout()">
+                            Proses Pesanan Sekarang
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <div class="cart-drawer-footer" style="padding: 0; background: transparent; border: none;">
-                <div class="summary-flex">
-                    <span>Total:</span>
-                    <strong id="cart-total" style="color: #16a34a;">Rp 0</strong>
-                </div>
-                <button type="submit" class="btn-checkout-main" id="checkoutBtn" disabled style="opacity: 0.6; cursor: not-allowed;" onclick="prepareCheckout()">
-                    Proses Pesanan Sekarang
-                </button>
-            </div>
-        </form>
-    </div>
+            <script>
+                let cart = [];
 
-    <script>
-        let cart = [];
-
-        function toggleCartDrawer() {
-            document.getElementById('cartDrawer').classList.toggle('open');
-            document.getElementById('cartOverlay').classList.toggle('show');
-        }
-
-        function addToCart(id, name, price, maxStock) {
-            const existingItem = cart.find(item => item.id === id);
-            if (existingItem) {
-                if (existingItem.quantity < maxStock) {
-                    existingItem.quantity += 1;
-                } else {
-                    alert("Jumlah pesanan melebihi stok yang tersedia!");
-                    return;
+                function toggleCartDrawer() {
+                    document.getElementById('cartDrawer').classList.toggle('open');
+                    document.getElementById('cartOverlay').classList.toggle('show');
                 }
-            } else {
-                cart.push({ id, name, price, quantity: 1, maxStock, note: '' });
-            }
-            updateCartUI();
-        }
 
-        function updateQuantity(id, amount) {
-            const item = cart.find(item => item.id === id);
-            if (item) {
-                item.quantity += amount;
-                if (item.quantity > item.maxStock) {
-                    item.quantity = item.maxStock;
-                    alert("Jumlah pesanan mencapai batas stok!");
+                function addToCart(id, name, price, maxStock) {
+                    const existingItem = cart.find(item => item.id === id);
+                    if (existingItem) {
+                        if (existingItem.quantity < maxStock) {
+                            existingItem.quantity += 1;
+                        } else {
+                            alert("Jumlah pesanan melebihi stok yang tersedia!");
+                            return;
+                        }
+                    } else {
+                        cart.push({
+                            id,
+                            name,
+                            price,
+                            quantity: 1,
+                            maxStock,
+                            note: ''
+                        });
+                    }
+                    updateCartUI();
                 }
-                if (item.quantity <= 0) {
-                    cart = cart.filter(i => i.id !== id);
+
+                function updateQuantity(id, amount) {
+                    const item = cart.find(item => item.id === id);
+                    if (item) {
+                        item.quantity += amount;
+                        if (item.quantity > item.maxStock) {
+                            item.quantity = item.maxStock;
+                            alert("Jumlah pesanan mencapai batas stok!");
+                        }
+                        if (item.quantity <= 0) {
+                            cart = cart.filter(i => i.id !== id);
+                        }
+                    }
+                    updateCartUI();
                 }
-            }
-            updateCartUI();
-        }
 
-        // Fungsi memperbarui catatan/request per item menu di keranjang
-        function updateNote(id, value) {
-            const item = cart.find(item => item.id === id);
-            if (item) {
-                item.note = value;
-            }
-        }
+                // Fungsi memperbarui catatan/request per item menu di keranjang
+                function updateNote(id, value) {
+                    const item = cart.find(item => item.id === id);
+                    if (item) {
+                        item.note = value;
+                    }
+                }
 
-        function calculateTotal() {
-            return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-        }
+                function calculateTotal() {
+                    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                }
 
-        function updateCartUI() {
-            const container = document.getElementById('cart-items-container');
-            const totalElement = document.getElementById('cart-total');
-            const counterElement = document.getElementById('cart-counter');
-            const checkoutBtn = document.getElementById('checkoutBtn');
-            
-            if (!container) return;
-            container.innerHTML = '';
-            
-            if (cart.length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 40px 0;">Keranjang masih kosong</p>';
-                totalElement.innerText = 'Rp 0';
-                counterElement.innerText = '0';
-                checkoutBtn.disabled = true;
-                checkoutBtn.style.opacity = '0.6';
-                checkoutBtn.style.cursor = 'not-allowed';
-                return;
-            }
-            
-            counterElement.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
-            
-            checkoutBtn.disabled = false;
-            checkoutBtn.style.opacity = '1';
-            checkoutBtn.style.cursor = 'pointer';
-            
-            cart.forEach(item => {
-                const row = document.createElement('div');
-                row.className = 'cart-item-row';
-                row.innerHTML = `
+                function updateCartUI() {
+                    const container = document.getElementById('cart-items-container');
+                    const totalElement = document.getElementById('cart-total');
+                    const counterElement = document.getElementById('cart-counter');
+                    const checkoutBtn = document.getElementById('checkoutBtn');
+
+                    if (!container) return;
+                    container.innerHTML = '';
+
+                    if (cart.length === 0) {
+                        container.innerHTML = '<p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 40px 0;">Keranjang masih kosong</p>';
+                        totalElement.innerText = 'Rp 0';
+                        counterElement.innerText = '0';
+                        checkoutBtn.disabled = true;
+                        checkoutBtn.style.opacity = '0.6';
+                        checkoutBtn.style.cursor = 'not-allowed';
+                        return;
+                    }
+
+                    counterElement.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.style.opacity = '1';
+                    checkoutBtn.style.cursor = 'pointer';
+
+                    cart.forEach(item => {
+                        const row = document.createElement('div');
+                        row.className = 'cart-item-row';
+                        row.innerHTML = `
                     <div class="cart-item-top">
                         <div style="font-size: 0.9rem;">
                             <strong>${item.name}</strong><br>
@@ -839,63 +1016,19 @@ else :
                         <input type="text" class="input-note" placeholder="Catatan/request (contoh: jangan pakai pedas)" value="${item.note || ''}" oninput="updateNote(${item.id}, this.value)">
                     </div>
                 `;
-                container.appendChild(row);
-            });
-            
-            totalElement.innerText = `Rp ${calculateTotal().toLocaleString('id-ID')}`;
-        }
+                        container.appendChild(row);
+                    });
 
-        // Masukkan data keranjang beserta catatan ke dalam input tersembunyi sebelum dikirim ke database
-        function prepareCheckout() {
-            document.getElementById('cartDataInput').value = JSON.stringify(cart);
-        }
-    </script>
+                    totalElement.innerText = `Rp ${calculateTotal().toLocaleString('id-ID')}`;
+                }
 
-    
-    <!-- POP UP LOGOUT -->
-<div class="logout-overlay" id="logoutPopup">
-    <div class="logout-popup-card">
+                // Masukkan data keranjang beserta catatan ke dalam input tersembunyi sebelum dikirim ke database
+                function prepareCheckout() {
+                    document.getElementById('cartDataInput').value = JSON.stringify(cart);
+                }
+            </script>
+        </body>
 
-        <div class="logout-icon">👋</div>
-
-        <h2>Yakin ingin keluar?</h2>
-
-        <p>
-            Kamu akan keluar dari akun Kantin Sehat.
-        </p>
-
-        <div class="logout-buttons">
-            <button type="button" class="btn-cancel-logout" onclick="closeLogoutPopup()">
-                Batal
-            </button>
-
-            <a href="?action=logout" class="btn-confirm-logout">
-                Ya, Logout
-            </a>
-        </div>
-
-    </div>
-</div>
-
-<script>
-function showLogoutPopup(event) {
-    event.preventDefault();
-
-    document.getElementById('logoutPopup').classList.add('show');
-}
-
-function closeLogoutPopup() {
-    document.getElementById('logoutPopup').classList.remove('show');
-}
-
-// Klik area luar popup untuk menutup
-document.getElementById('logoutPopup').addEventListener('click', function(event) {
-    if (event.target === this) {
-        closeLogoutPopup();
-    }
-});
-</script>
-</body>
-</html>
+    </html>
 
 <?php endif; ?>
